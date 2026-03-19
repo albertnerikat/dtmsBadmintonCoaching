@@ -1,6 +1,24 @@
-const { Router } = require('express');
-const router = Router();
+const express = require('express');
+const jwt = require('jsonwebtoken');
+const router = express.Router();
 
-// Placeholder — implemented in a later task
+router.post('/login', (req, res) => {
+  const { email, password } = req.body;
+
+  if (
+    email !== process.env.COACH_EMAIL ||
+    password !== process.env.COACH_PASSWORD
+  ) {
+    return res.status(401).json({ error: 'Invalid credentials' });
+  }
+
+  const token = jwt.sign(
+    { role: 'coach' },
+    process.env.JWT_SECRET,
+    { expiresIn: '24h' }
+  );
+
+  res.json({ token });
+});
 
 module.exports = router;

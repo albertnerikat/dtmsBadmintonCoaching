@@ -45,8 +45,14 @@ describe('encrypt / decrypt', () => {
   it('throws on tampered ciphertext (auth tag mismatch)', () => {
     const ciphertext = encrypt('sensitive');
     const [iv, authTag, data] = ciphertext.split(':');
+    // Replace data bytes with ff... keeping format valid so the regex passes
     const tampered = `${iv}:${authTag}:${'ff'.repeat(data.length / 2)}`;
     expect(() => decrypt(tampered)).toThrow();
+  });
+
+  it('returns plaintext as-is for unencrypted legacy values', () => {
+    expect(decrypt('Alice')).toBe('Alice');
+    expect(decrypt('555-1234')).toBe('555-1234');
   });
 });
 
@@ -64,10 +70,11 @@ describe('encryptStudent / decryptStudent', () => {
     };
     const encrypted = encryptStudent(student);
     expect(encrypted.name).not.toBe('Alice');
-    expect(encrypted.date_of_birth).not.toBe('2015-06-01');
     expect(encrypted.parent_name).not.toBe('Bob');
     expect(encrypted.parent_phone).not.toBe('555-0001');
     expect(encrypted.parent_email).not.toBe('bob@test.com');
+    // date_of_birth is NOT encrypted (stored in a DATE column)
+    expect(encrypted.date_of_birth).toBe('2015-06-01');
     expect(encrypted.id).toBe('abc-123');
     expect(encrypted.skill_level).toBe('Beginner');
     expect(encrypted.status).toBe('active');

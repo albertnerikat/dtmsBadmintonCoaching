@@ -20,8 +20,12 @@ function encrypt(plaintext) {
   return `${iv.toString('hex')}:${authTag.toString('hex')}:${encrypted.toString('hex')}`;
 }
 
+const ENCRYPTED_RE = /^[0-9a-f]{24}:[0-9a-f]{32}:[0-9a-f]+$/;
+
 function decrypt(ciphertext) {
   if (ciphertext == null) return null;
+  // Return plaintext values as-is (handles unencrypted legacy records)
+  if (!ENCRYPTED_RE.test(ciphertext)) return ciphertext;
   const [ivHex, authTagHex, dataHex] = ciphertext.split(':');
   const iv = Buffer.from(ivHex, 'hex');
   const authTag = Buffer.from(authTagHex, 'hex');
@@ -31,7 +35,7 @@ function decrypt(ciphertext) {
   return Buffer.concat([decipher.update(data), decipher.final()]).toString('utf8');
 }
 
-const PII_FIELDS = ['name', 'date_of_birth', 'parent_name', 'parent_phone', 'parent_email'];
+const PII_FIELDS = ['name', 'parent_name', 'parent_phone', 'parent_email'];
 
 function encryptStudent(student) {
   const result = { ...student };

@@ -4,6 +4,7 @@ const router = express.Router();
 const authMiddleware = require('../middleware/authMiddleware');
 const supabase = require('../lib/supabase');
 const { getAgeCategory } = require('../lib/ageCategory');
+const { encryptStudent, decryptStudent } = require('../lib/encryption');
 
 function addAgeCategory(student) {
   return { ...student, age_category: getAgeCategory(student.date_of_birth) };
@@ -33,7 +34,7 @@ router.get('/', async (req, res) => {
     .eq('status', status)
     .order('name');
   if (error) return res.status(500).json({ error: error.message });
-  res.json(data.map(addAgeCategory));
+  res.json(data.map(s => addAgeCategory(decryptStudent(s))));
 });
 
 // GET /api/students/:id
@@ -45,7 +46,7 @@ router.get('/:id', async (req, res) => {
     .single();
   if (error?.code === 'PGRST116') return res.status(404).json({ error: 'Student not found' });
   if (error) return res.status(500).json({ error: error.message });
-  res.json(addAgeCategory(data));
+  res.json(addAgeCategory(decryptStudent(data)));
 });
 
 // POST /api/students
@@ -55,26 +56,28 @@ router.post('/', async (req, res) => {
     return res.status(400).json({ error: `Missing fields: ${missing.join(', ')}` });
   }
   const { name, date_of_birth, skill_level, parent_name, parent_phone, parent_email } = req.body;
+  const toInsert = encryptStudent({ name, parent_name, parent_phone, parent_email });
   const { data, error } = await supabase
     .from('students')
-    .insert({ name, date_of_birth, skill_level, parent_name, parent_phone, parent_email })
+    .insert({ ...toInsert, date_of_birth, skill_level })
     .select()
     .single();
   if (error) return res.status(500).json({ error: error.message });
-  res.status(201).json(addAgeCategory(data));
+  res.status(201).json(addAgeCategory(decryptStudent(data)));
 });
 
 // PUT /api/students/:id
 router.put('/:id', async (req, res) => {
   const { name, date_of_birth, skill_level, parent_name, parent_phone, parent_email, sibling_ids } = req.body;
+  const toUpdate = encryptStudent({ name, parent_name, parent_phone, parent_email });
   const { data, error } = await supabase
     .from('students')
-    .update({ name, date_of_birth, skill_level, parent_name, parent_phone, parent_email, sibling_ids })
+    .update({ ...toUpdate, date_of_birth, skill_level, sibling_ids })
     .eq('id', req.params.id)
     .select()
     .single();
   if (error) return res.status(500).json({ error: error.message });
-  res.json(addAgeCategory(data));
+  res.json(addAgeCategory(decryptStudent(data)));
 });
 
 // PATCH /api/students/:id/archive
@@ -86,7 +89,7 @@ router.patch('/:id/archive', async (req, res) => {
     .select()
     .single();
   if (error) return res.status(500).json({ error: error.message });
-  res.json(addAgeCategory(data));
+  res.json(addAgeCategory(decryptStudent(data)));
 });
 
 // POST /api/students/:id/regenerate-token

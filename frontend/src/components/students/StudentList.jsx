@@ -1,3 +1,5 @@
+import { useNavigate } from 'react-router-dom';
+
 const CATEGORY_COLORS = {
   U13: 'bg-green-100 text-green-800',
   U15: 'bg-blue-100 text-blue-800',
@@ -6,6 +8,8 @@ const CATEGORY_COLORS = {
 };
 
 export default function StudentList({ students, onEdit, onArchive, onCopyLink }) {
+  const navigate = useNavigate();
+
   if (students.length === 0) {
     return <p className="text-center text-gray-500 py-12">No students found.</p>;
   }
@@ -39,6 +43,7 @@ export default function StudentList({ students, onEdit, onArchive, onCopyLink })
               <td className="px-3 py-2 border">
                 <div className="flex gap-3">
                   <button onClick={() => onEdit(student)} className="text-blue-600 hover:underline">Edit</button>
+                  <button onClick={() => navigate(`/ledger/${student.id}`)} className="text-purple-600 hover:underline">Ledger</button>
                   <button onClick={() => onCopyLink(student)} className="text-green-600 hover:underline">Copy Link</button>
                   <button onClick={() => onArchive(student.id)} className="text-red-500 hover:underline">Archive</button>
                 </div>

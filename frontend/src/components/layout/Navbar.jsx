@@ -14,6 +14,7 @@ export default function Navbar() {
     <nav className="bg-blue-700 text-white px-6 py-3 flex items-center justify-between">
       <div className="flex items-center gap-6">
         <span className="font-bold text-lg">DTMS Badminton</span>
+        <Link to="/dashboard" className="text-sm hover:underline">Dashboard</Link>
         <Link to="/students" className="text-sm hover:underline">Students</Link>
         <Link to="/schedules" className="text-sm hover:underline">Schedules</Link>
       </div>

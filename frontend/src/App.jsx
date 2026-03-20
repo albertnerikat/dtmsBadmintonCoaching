@@ -6,6 +6,9 @@ import LoginPage from './pages/LoginPage';
 import StudentsPage from './pages/StudentsPage';
 import SchedulesPage from './pages/SchedulesPage';
 import AttendancePage from './pages/AttendancePage';
+import DashboardPage from './pages/DashboardPage';
+import LedgerPage from './pages/LedgerPage';
+import ParentPage from './pages/ParentPage';
 
 function CoachLayout({ children }) {
   return (
@@ -30,10 +33,13 @@ export default function App() {
       <AuthProvider>
         <Routes>
           <Route path="/login" element={<LoginPage />} />
+          <Route path="/dashboard" element={<ProtectedCoachPage><DashboardPage /></ProtectedCoachPage>} />
           <Route path="/students" element={<ProtectedCoachPage><StudentsPage /></ProtectedCoachPage>} />
           <Route path="/schedules" element={<ProtectedCoachPage><SchedulesPage /></ProtectedCoachPage>} />
           <Route path="/attendance/:scheduleId" element={<ProtectedCoachPage><AttendancePage /></ProtectedCoachPage>} />
-          <Route path="*" element={<Navigate to="/students" replace />} />
+          <Route path="/ledger/:studentId" element={<ProtectedCoachPage><LedgerPage /></ProtectedCoachPage>} />
+          <Route path="/parent/:token" element={<ParentPage />} />
+          <Route path="*" element={<Navigate to="/dashboard" replace />} />
         </Routes>
       </AuthProvider>
     </BrowserRouter>

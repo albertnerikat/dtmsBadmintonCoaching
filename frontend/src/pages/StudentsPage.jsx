@@ -62,6 +62,24 @@ export default function StudentsPage() {
     alert('Parent link copied to clipboard!');
   }
 
+  function handleExportCSV() {
+    const escape = val => `"${String(val ?? '').replace(/"/g, '""')}"`;
+    const header = ['Name', 'Age Category', 'Skill Level', 'Parent Name', 'Parent Phone'].join(',');
+    const rows = students.map(s =>
+      [s.name, s.age_category, s.skill_level, s.parent_name, s.parent_phone].map(escape).join(',')
+    );
+    const csv = '\uFEFF' + [header, ...rows].join('\r\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'students.csv';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(() => URL.revokeObjectURL(url), 100);
+  }
+
   const filtered = students
     .filter(s => filter === 'All' || s.age_category === filter)
     .filter(s => s.name.toLowerCase().includes(search.toLowerCase()));
@@ -70,12 +88,20 @@ export default function StudentsPage() {
     <div>
       <div className="flex items-center justify-between mb-4">
         <h1 className="text-xl font-bold">Students</h1>
-        <button
-          onClick={() => setModal('add')}
-          className="bg-blue-700 text-white px-4 py-2 rounded text-sm hover:bg-blue-800"
-        >
-          + Add Student
-        </button>
+        <div className="flex gap-2">
+          <button
+            onClick={handleExportCSV}
+            className="border border-gray-300 text-gray-700 px-4 py-2 rounded text-sm hover:bg-gray-50"
+          >
+            Export CSV
+          </button>
+          <button
+            onClick={() => setModal('add')}
+            className="bg-blue-700 text-white px-4 py-2 rounded text-sm hover:bg-blue-800"
+          >
+            + Add Student
+          </button>
+        </div>
       </div>
 
       <div className="flex flex-wrap gap-3 mb-4">

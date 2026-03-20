@@ -9,10 +9,17 @@ function addAgeCategory(student) {
   return { ...student, age_category: getAgeCategory(student.date_of_birth) };
 }
 
-const REQUIRED_FIELDS = [
-  'name', 'date_of_birth', 'skill_level',
-  'parent_name', 'parent_phone', 'parent_email',
-];
+const ALWAYS_REQUIRED = ['name', 'date_of_birth', 'skill_level'];
+const CONTACT_FIELDS = ['parent_name', 'parent_phone', 'parent_email'];
+
+function getMissingFields(body) {
+  const missing = ALWAYS_REQUIRED.filter(f => !body[f]);
+  // Contact fields are only required for non-adults
+  if (body.date_of_birth && getAgeCategory(body.date_of_birth) !== 'Adults') {
+    missing.push(...CONTACT_FIELDS.filter(f => !body[f]));
+  }
+  return missing;
+}
 
 // All student routes require coach auth
 router.use(authMiddleware);
@@ -43,7 +50,7 @@ router.get('/:id', async (req, res) => {
 
 // POST /api/students
 router.post('/', async (req, res) => {
-  const missing = REQUIRED_FIELDS.filter(f => !req.body[f]);
+  const missing = getMissingFields(req.body);
   if (missing.length) {
     return res.status(400).json({ error: `Missing fields: ${missing.join(', ')}` });
   }

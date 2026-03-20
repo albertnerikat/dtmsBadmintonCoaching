@@ -22,7 +22,7 @@ export default function StudentList({ students, onEdit, onArchive, onCopyLink })
             <th className="px-3 py-2 border">Name</th>
             <th className="px-3 py-2 border">Age Category</th>
             <th className="px-3 py-2 border">Skill Level</th>
-            <th className="px-3 py-2 border">Parent</th>
+            <th className="px-3 py-2 border">Parent / Contact</th>
             <th className="px-3 py-2 border">Actions</th>
           </tr>
         </thead>

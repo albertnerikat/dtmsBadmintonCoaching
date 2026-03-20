@@ -7,6 +7,8 @@ const recurringRoutes = require('./routes/recurring');
 const attendanceRoutes = require('./routes/attendance');
 const paymentRoutes = require('./routes/payments');
 const ledgerRoutes = require('./routes/ledger');
+const dashboardRoutes = require('./routes/dashboard');
+const parentRoutes = require('./routes/parent');
 
 const app = express();
 
@@ -20,6 +22,8 @@ app.use('/api/recurring', recurringRoutes);
 app.use('/api/attendance', attendanceRoutes);
 app.use('/api/payments', paymentRoutes);
 app.use('/api/students', ledgerRoutes);  // handles /:id/ledger — does not conflict with studentRoutes
+app.use('/api/dashboard', dashboardRoutes);
+app.use('/api/parent', parentRoutes);
 
 app.get('/api/health', (req, res) => res.json({ status: 'ok' }));
 

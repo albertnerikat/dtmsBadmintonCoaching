@@ -15,6 +15,7 @@ export default function Navbar() {
       <div className="flex items-center gap-6">
         <span className="font-bold text-lg">DTMS Badminton</span>
         <Link to="/students" className="text-sm hover:underline">Students</Link>
+        <Link to="/schedules" className="text-sm hover:underline">Schedules</Link>
       </div>
       <button onClick={handleLogout} className="text-sm hover:underline">Logout</button>
     </nav>

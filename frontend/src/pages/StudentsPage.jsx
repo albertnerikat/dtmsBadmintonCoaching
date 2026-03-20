@@ -3,7 +3,7 @@ import { api } from '../lib/api';
 import StudentList from '../components/students/StudentList';
 import StudentForm from '../components/students/StudentForm';
 
-const AGE_CATEGORIES = ['All', 'U13', 'U15', 'U17', 'Adults'];
+const AGE_CATEGORIES = ['All', 'U9', 'U11', 'U13', 'U15', 'U17', 'U19', 'Adults'];
 
 function Modal({ title, onClose, children }) {
   return (

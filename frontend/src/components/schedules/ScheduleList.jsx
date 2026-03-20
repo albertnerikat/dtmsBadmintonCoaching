@@ -7,11 +7,14 @@ const STATUS_COLORS = {
 };
 
 const CATEGORY_COLORS = {
-  U13: 'bg-green-100 text-green-800',
-  U15: 'bg-blue-100 text-blue-800',
-  U17: 'bg-purple-100 text-purple-800',
+  U9:     'bg-pink-100 text-pink-800',
+  U11:    'bg-cyan-100 text-cyan-800',
+  U13:    'bg-green-100 text-green-800',
+  U15:    'bg-blue-100 text-blue-800',
+  U17:    'bg-purple-100 text-purple-800',
+  U19:    'bg-indigo-100 text-indigo-800',
   Adults: 'bg-orange-100 text-orange-800',
-  Mixed: 'bg-yellow-100 text-yellow-800',
+  Mixed:  'bg-yellow-100 text-yellow-800',
 };
 
 const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];

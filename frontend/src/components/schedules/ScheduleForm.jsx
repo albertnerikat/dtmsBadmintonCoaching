@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-const AGE_CATEGORIES = ['U13', 'U15', 'U17', 'Adults', 'Mixed'];
+const AGE_CATEGORIES = ['U9', 'U11', 'U13', 'U15', 'U17', 'U19', 'Adults', 'Mixed'];
 
 export default function ScheduleForm({ initial = {}, onSubmit, onCancel }) {
   const [form, setForm] = useState({

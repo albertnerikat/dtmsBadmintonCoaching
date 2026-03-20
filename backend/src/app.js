@@ -2,6 +2,9 @@ const express = require('express');
 const cors = require('cors');
 const authRoutes = require('./routes/auth');
 const studentRoutes = require('./routes/students');
+const scheduleRoutes = require('./routes/schedules');
+const recurringRoutes = require('./routes/recurring');
+const attendanceRoutes = require('./routes/attendance');
 
 const app = express();
 
@@ -10,6 +13,9 @@ app.use(express.json());
 
 app.use('/api/auth', authRoutes);
 app.use('/api/students', studentRoutes);
+app.use('/api/schedules', scheduleRoutes);
+app.use('/api/recurring', recurringRoutes);
+app.use('/api/attendance', attendanceRoutes);
 
 app.get('/api/health', (req, res) => res.json({ status: 'ok' }));
 

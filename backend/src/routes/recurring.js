@@ -4,7 +4,7 @@ const authMiddleware = require('../middleware/authMiddleware');
 const supabase = require('../lib/supabase');
 
 const REQUIRED_FIELDS = ['days_of_week', 'time', 'duration_minutes', 'location', 'age_category', 'start_date'];
-const VALID_CATEGORIES = ['U13', 'U15', 'U17', 'Adults', 'Mixed'];
+const VALID_CATEGORIES = ['U9', 'U11', 'U13', 'U15', 'U17', 'U19', 'Adults', 'Mixed'];
 
 function generateSessionDates(daysOfWeek, startDate, endDate) {
   const dates = [];

@@ -5,7 +5,7 @@ const supabase = require('../lib/supabase');
 const { getAgeCategory } = require('../lib/ageCategory');
 
 const REQUIRED_FIELDS = ['date', 'time', 'duration_minutes', 'location', 'age_category'];
-const VALID_CATEGORIES = ['U13', 'U15', 'U17', 'Adults', 'Mixed'];
+const VALID_CATEGORIES = ['U9', 'U11', 'U13', 'U15', 'U17', 'U19', 'Adults', 'Mixed'];
 
 router.use(authMiddleware);
 

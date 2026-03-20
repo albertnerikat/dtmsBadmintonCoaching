@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { api } from '../lib/api';
 import ScheduleList from '../components/schedules/ScheduleList';
 import ScheduleForm from '../components/schedules/ScheduleForm';
+import RecurringForm from '../components/schedules/RecurringForm';
 
 const STATUS_FILTERS = ['All', 'scheduled', 'cancelled'];
 
@@ -94,16 +95,31 @@ export default function SchedulesPage() {
     setModal(null);
   }
 
+  async function handleAddRecurring(form) {
+    const result = await api.post('/recurring', form);
+    await loadSchedules();
+    setModal(null);
+    alert(`Created ${result.sessions_created} session(s) in the series.`);
+  }
+
   return (
     <div>
       <div className="flex items-center justify-between mb-4">
         <h1 className="text-xl font-bold">Schedules</h1>
-        <button
-          onClick={() => setModal('add')}
-          className="bg-blue-700 text-white px-4 py-2 rounded text-sm hover:bg-blue-800"
-        >
-          + Add Session
-        </button>
+        <div className="flex gap-2">
+          <button
+            onClick={() => setModal('add')}
+            className="bg-blue-700 text-white px-4 py-2 rounded text-sm hover:bg-blue-800"
+          >
+            + One-off Session
+          </button>
+          <button
+            onClick={() => setModal('recurring')}
+            className="border border-blue-700 text-blue-700 px-4 py-2 rounded text-sm hover:bg-blue-50"
+          >
+            + Recurring Series
+          </button>
+        </div>
       </div>
 
       <div className="flex gap-1 mb-4">
@@ -142,6 +158,12 @@ export default function SchedulesPage() {
             onConfirm={handleCancel}
             onClose={() => setModal(null)}
           />
+        </Modal>
+      )}
+
+      {modal === 'recurring' && (
+        <Modal title="Create Recurring Series" onClose={() => setModal(null)}>
+          <RecurringForm onSubmit={handleAddRecurring} onCancel={() => setModal(null)} />
         </Modal>
       )}
     </div>

@@ -2,19 +2,21 @@ const express = require('express');
 const router = express.Router();
 const supabase = require('../lib/supabase');
 const { getAgeCategory } = require('../lib/ageCategory');
+const { decryptStudent } = require('../lib/encryption');
 
 // No authMiddleware — public endpoint using token-based access
 
 // GET /api/parent/:token
 router.get('/:token', async (req, res) => {
   // Look up student by parent_access_token (exclude sensitive fields)
-  const { data: student, error: stuErr } = await supabase
+  const { data: rawStudent, error: stuErr } = await supabase
     .from('students')
     .select('id, name, date_of_birth, skill_level')
     .eq('parent_access_token', req.params.token)
     .single();
   if (stuErr?.code === 'PGRST116') return res.status(404).json({ error: 'Invalid link' });
   if (stuErr) return res.status(500).json({ error: stuErr.message });
+  const student = decryptStudent(rawStudent);
 
   // Get all non-absent attendance with schedule info
   const { data: attendance, error: attErr } = await supabase

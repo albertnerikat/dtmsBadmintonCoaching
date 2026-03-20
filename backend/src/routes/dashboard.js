@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const authMiddleware = require('../middleware/authMiddleware');
 const supabase = require('../lib/supabase');
+const { decryptStudent } = require('../lib/encryption');
 
 router.use(authMiddleware);
 
@@ -55,6 +56,7 @@ router.get('/', async (req, res) => {
     if (stuErr) return res.status(500).json({ error: stuErr.message });
 
     studentBalances = (students || [])
+      .map(decryptStudent)
       .map(s => ({
         id: s.id,
         name: s.name,

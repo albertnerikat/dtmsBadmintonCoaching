@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const authMiddleware = require('../middleware/authMiddleware');
 const supabase = require('../lib/supabase');
+const { decryptStudent } = require('../lib/encryption');
 
 router.use(authMiddleware);
 
@@ -9,13 +10,14 @@ router.use(authMiddleware);
 // This router is mounted at /api/students alongside studentRoutes.
 // Express only matches /:id/ledger here — /:id alone is handled by studentRoutes.
 router.get('/:id/ledger', async (req, res) => {
-  const { data: student, error: stuErr } = await supabase
+  const { data: rawStudent, error: stuErr } = await supabase
     .from('students')
     .select('id, name, date_of_birth, skill_level, status')
     .eq('id', req.params.id)
     .single();
   if (stuErr?.code === 'PGRST116') return res.status(404).json({ error: 'Student not found' });
   if (stuErr) return res.status(500).json({ error: stuErr.message });
+  const student = decryptStudent(rawStudent);
 
   // Get all non-absent attendance with schedule info
   // Supabase join: 'schedule:schedules(...)' creates a nested 'schedule' object per row

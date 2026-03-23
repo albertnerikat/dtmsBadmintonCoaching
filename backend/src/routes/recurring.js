@@ -8,17 +8,20 @@ const VALID_CATEGORIES = ['U9', 'U11', 'U13', 'U15', 'U17', 'U19', 'Adults', 'Mi
 
 function generateSessionDates(daysOfWeek, startDate, endDate) {
   const dates = [];
-  const start = new Date(startDate);
-  const end = endDate
-    ? new Date(endDate)
-    : (() => { const d = new Date(startDate); d.setFullYear(d.getFullYear() + 1); return d; })();
+  // Ensure we work with UTC midnights to avoid local timezone shifts
+  const startStr = startDate.slice(0, 10);
+  const start = new Date(`${startStr}T00:00:00Z`);
+  const endStr = endDate ? endDate.slice(0, 10) : null;
+  const end = endStr
+    ? new Date(`${endStr}T00:00:00Z`)
+    : (() => { const d = new Date(start); d.setUTCFullYear(d.getUTCFullYear() + 1); return d; })();
 
   const current = new Date(start);
   while (current <= end) {
-    if (daysOfWeek.includes(current.getDay())) {
+    if (daysOfWeek.includes(current.getUTCDay())) {
       dates.push(current.toISOString().slice(0, 10));
     }
-    current.setDate(current.getDate() + 1);
+    current.setUTCDate(current.getUTCDate() + 1);
   }
   return dates;
 }

@@ -3,6 +3,7 @@ const router = express.Router();
 const authMiddleware = require('../middleware/authMiddleware');
 const supabase = require('../lib/supabase');
 const { getAgeCategory } = require('../lib/ageCategory');
+const { decryptStudent } = require('../lib/encryption');
 
 const REQUIRED_FIELDS = ['date', 'time', 'duration_minutes', 'location', 'age_category'];
 const VALID_CATEGORIES = ['U9', 'U11', 'U13', 'U15', 'U17', 'U19', 'Adults', 'Mixed'];
@@ -91,6 +92,8 @@ router.get('/:id/attendance', async (req, res) => {
   if (attErr) return res.status(500).json({ error: attErr.message });
 
   const relevant = students
+    .map(decryptStudent)
+    .sort((a, b) => a.name.localeCompare(b.name))
     .map(s => ({ ...s, age_category: getAgeCategory(s.date_of_birth) }))
     .filter(s => schedule.age_category === 'Mixed' || s.age_category === schedule.age_category);
 

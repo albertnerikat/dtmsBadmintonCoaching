@@ -1,8 +1,10 @@
 import { getToken } from './auth';
 
+const API_BASE_URL = import.meta.env.VITE_API_URL || '';
+
 async function request(path, options = {}) {
   const token = getToken();
-  const res = await fetch(`/api${path}`, {
+  const res = await fetch(`${API_BASE_URL}/api${path}`, {
     ...options,
     headers: {
       'Content-Type': 'application/json',

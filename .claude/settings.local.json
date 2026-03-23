@@ -1,0 +1,22 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git -C /c/Albert/dtmsBadmintonCoaching status)",
+      "Bash(npm init:*)",
+      "Bash(npm install:*)",
+      "Bash(timeout 5 node server.js)",
+      "Bash(git init:*)",
+      "Bash(git add:*)",
+      "Bash(git:*)",
+      "Bash(node:*)",
+      "Bash(npm create:*)",
+      "Bash(npm run:*)",
+      "Bash(dir \"C:\\\\Albert\\\\dtmsBadmintonCoaching\\\\backend\\\\src\\\\lib\")",
+      "Bash(dir \"C:\\\\Albert\\\\dtmsBadmintonCoaching\\\\backend\\\\src\\\\middleware\")",
+      "Bash(dir \"C:\\\\Albert\\\\dtmsBadmintonCoaching\\\\backend\\\\tests\")",
+      "Bash(npm test:*)",
+      "Bash(grep -rhn \"^\\\\s*it\\(\" /c/Albert/dtmsBadmintonCoaching/backend/tests/*.test.js)",
+      "Bash(npx jest:*)"
+    ]
+  }
+}

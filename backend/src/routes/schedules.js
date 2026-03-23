@@ -12,7 +12,7 @@ router.use(authMiddleware);
 
 // GET /api/schedules
 router.get('/', async (req, res) => {
-  const { status, age_category, date_from, date_to } = req.query;
+  const { status, age_category, date_from, date_to, day } = req.query;
   let query = supabase.from('schedules').select('*').order('date').order('time');
   if (status) query = query.eq('status', status);
   if (age_category) query = query.eq('age_category', age_category);
@@ -20,7 +20,18 @@ router.get('/', async (req, res) => {
   if (date_to) query = query.lte('date', date_to);
   const { data, error } = await query;
   if (error) return res.status(500).json({ error: error.message });
-  res.json(data);
+
+  let result = data;
+  if (day) {
+    result = data.filter(s => {
+      if (!s.date) return false;
+      const d = new Date(s.date + 'T12:00:00Z');
+      const dayName = d.toLocaleDateString('en-US', { weekday: 'long', timeZone: 'UTC' });
+      return dayName.toLowerCase() === day.toLowerCase();
+    });
+  }
+
+  res.json(result);
 });
 
 // GET /api/schedules/:id

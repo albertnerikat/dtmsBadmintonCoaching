@@ -5,6 +5,8 @@ import ScheduleForm from '../components/schedules/ScheduleForm';
 import RecurringForm from '../components/schedules/RecurringForm';
 
 const STATUS_FILTERS = ['All', 'scheduled', 'cancelled'];
+const DAY_FILTERS = ['All', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+const TIME_FILTERS = ['All', 'Upcoming', 'Past'];
 
 function Modal({ title, onClose, children }) {
   return (
@@ -67,15 +69,37 @@ function CancelModal({ schedule, onConfirm, onClose }) {
 export default function SchedulesPage() {
   const [schedules, setSchedules] = useState([]);
   const [statusFilter, setStatusFilter] = useState('scheduled');
+  const [dayFilter, setDayFilter] = useState('All');
+  const [timeFilter, setTimeFilter] = useState('All');
   const [modal, setModal] = useState(null); // null | 'add' | { cancel: schedule }
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => { loadSchedules(); }, [statusFilter]);
+  useEffect(() => { loadSchedules(); }, [statusFilter, dayFilter, timeFilter]);
+
+  function getLocalDateString(dateObj) {
+    const year = dateObj.getFullYear();
+    const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+    const day = String(dateObj.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  }
 
   async function loadSchedules() {
     setLoading(true);
     try {
-      const query = statusFilter === 'All' ? '/schedules' : `/schedules?status=${statusFilter}`;
+      const params = new URLSearchParams();
+      if (statusFilter !== 'All') params.append('status', statusFilter);
+      if (dayFilter !== 'All') params.append('day', dayFilter);
+      
+      if (timeFilter === 'Upcoming') {
+        params.append('date_from', getLocalDateString(new Date()));
+      } else if (timeFilter === 'Past') {
+        const yesterday = new Date();
+        yesterday.setDate(yesterday.getDate() - 1);
+        params.append('date_to', getLocalDateString(yesterday));
+      }
+
+      const queryStr = params.toString();
+      const query = queryStr ? `/schedules?${queryStr}` : '/schedules';
       const data = await api.get(query);
       setSchedules(data);
     } finally {
@@ -122,18 +146,50 @@ export default function SchedulesPage() {
         </div>
       </div>
 
-      <div className="flex gap-1 mb-4">
-        {STATUS_FILTERS.map(f => (
-          <button
-            key={f}
-            onClick={() => setStatusFilter(f)}
-            className={`px-3 py-1.5 rounded text-sm border capitalize ${
-              statusFilter === f ? 'bg-blue-700 text-white border-blue-700' : 'border-gray-300 hover:bg-gray-50'
-            }`}
-          >
-            {f}
-          </button>
-        ))}
+      <div className="flex flex-wrap gap-4 mb-4">
+        <div className="flex gap-1">
+          {STATUS_FILTERS.map(f => (
+            <button
+              key={f}
+              onClick={() => setStatusFilter(f)}
+              className={`px-3 py-1.5 rounded text-sm border capitalize ${
+                statusFilter === f ? 'bg-blue-700 text-white border-blue-700' : 'border-gray-300 hover:bg-gray-50'
+              }`}
+            >
+              {f}
+            </button>
+          ))}
+        </div>
+        
+        <div className="flex gap-1 flex-wrap">
+          <span className="text-sm font-medium text-gray-500 self-center mr-1">Day:</span>
+          {DAY_FILTERS.map(d => (
+            <button
+              key={d}
+              onClick={() => setDayFilter(d)}
+              className={`px-3 py-1.5 rounded text-sm border ${
+                dayFilter === d ? 'bg-indigo-600 text-white border-indigo-600' : 'border-gray-300 hover:bg-gray-50'
+              }`}
+            >
+              {d.slice(0, 3)}
+            </button>
+          ))}
+        </div>
+
+        <div className="flex gap-1 flex-wrap">
+          <span className="text-sm font-medium text-gray-500 self-center mr-1">Time:</span>
+          {TIME_FILTERS.map(t => (
+            <button
+              key={t}
+              onClick={() => setTimeFilter(t)}
+              className={`px-3 py-1.5 rounded text-sm border ${
+                timeFilter === t ? 'bg-teal-600 text-white border-teal-600' : 'border-gray-300 hover:bg-gray-50'
+              }`}
+            >
+              {t}
+            </button>
+          ))}
+        </div>
       </div>
 
       {loading ? (

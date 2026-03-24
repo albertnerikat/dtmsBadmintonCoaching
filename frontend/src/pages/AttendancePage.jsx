@@ -46,7 +46,7 @@ export default function AttendancePage() {
       {schedule.status === 'cancelled' ? (
         <p className="text-gray-500 text-center py-8">This session has been cancelled.</p>
       ) : (
-        <CheckInView scheduleId={scheduleId} students={students} />
+        <CheckInView scheduleId={scheduleId} students={students} schedule={schedule} />
       )}
     </div>
   );

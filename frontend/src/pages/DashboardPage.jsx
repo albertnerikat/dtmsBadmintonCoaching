@@ -27,7 +27,33 @@ export default function DashboardPage() {
   if (loading) return <p className="text-gray-500">Loading dashboard...</p>;
   if (!data) return <p className="text-red-600">Failed to load dashboard.</p>;
 
-  const { upcoming_sessions, student_balances } = data;
+  const { upcoming_sessions, recent_sessions, student_balances } = data;
+
+  const now = new Date();
+  const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+  const todaySessions = upcoming_sessions.filter(s => s.date === todayStr);
+  const futureSessions = upcoming_sessions.filter(s => s.date > todayStr);
+
+  function SessionCard({ s }) {
+    return (
+      <div
+        onClick={() => navigate(`/attendance/${s.id}`)}
+        className="border rounded-lg p-3 cursor-pointer hover:bg-blue-50 hover:border-blue-200 transition-colors"
+      >
+        <div className="flex items-center justify-between">
+          <div className="font-medium">
+            {DAYS[new Date(s.date + 'T00:00:00').getDay()]}, {s.date}
+          </div>
+          <span className={`px-2 py-0.5 rounded text-xs font-medium ${CATEGORY_COLORS[s.age_category]}`}>
+            {s.age_category}
+          </span>
+        </div>
+        <div className="text-sm text-gray-500 mt-0.5">
+          {s.time.slice(0, 5)} · {s.duration_minutes} min · {s.location}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div>
@@ -35,36 +61,46 @@ export default function DashboardPage() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 
-        {/* Upcoming Sessions */}
-        <div>
-          <h2 className="text-lg font-semibold mb-3">
-            Upcoming Sessions <span className="text-gray-400 font-normal text-sm">(next 14 days)</span>
-          </h2>
-          {upcoming_sessions.length === 0 ? (
-            <p className="text-gray-400 text-sm">No sessions scheduled in the next 14 days.</p>
-          ) : (
-            <div className="space-y-2">
-              {upcoming_sessions.map(s => (
-                <div
-                  key={s.id}
-                  onClick={() => navigate(`/attendance/${s.id}`)}
-                  className="border rounded-lg p-3 cursor-pointer hover:bg-blue-50 hover:border-blue-200 transition-colors"
-                >
-                  <div className="flex items-center justify-between">
-                    <div className="font-medium">
-                      {DAYS[new Date(s.date + 'T00:00:00').getDay()]}, {s.date}
-                    </div>
-                    <span className={`px-2 py-0.5 rounded text-xs font-medium ${CATEGORY_COLORS[s.age_category]}`}>
-                      {s.age_category}
-                    </span>
-                  </div>
-                  <div className="text-sm text-gray-500 mt-0.5">
-                    {s.time.slice(0, 5)} · {s.duration_minutes} min · {s.location}
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
+        <div className="space-y-6">
+          {/* Past Sessions */}
+          <div>
+            <h2 className="text-lg font-semibold mb-3">
+              Past Sessions <span className="text-gray-400 font-normal text-sm">(last 2)</span>
+            </h2>
+            {recent_sessions.length === 0 ? (
+              <p className="text-gray-400 text-sm">No past sessions.</p>
+            ) : (
+              <div className="space-y-2">
+                {recent_sessions.map(s => <SessionCard key={s.id} s={s} />)}
+              </div>
+            )}
+          </div>
+
+          {/* Today's Sessions */}
+          <div>
+            <h2 className="text-lg font-semibold mb-3">Today's Sessions</h2>
+            {todaySessions.length === 0 ? (
+              <p className="text-gray-400 text-sm">No sessions scheduled for today.</p>
+            ) : (
+              <div className="space-y-2">
+                {todaySessions.map(s => <SessionCard key={s.id} s={s} />)}
+              </div>
+            )}
+          </div>
+
+          {/* Upcoming Sessions */}
+          <div>
+            <h2 className="text-lg font-semibold mb-3">
+              Upcoming Sessions <span className="text-gray-400 font-normal text-sm">(next 14 days)</span>
+            </h2>
+            {futureSessions.length === 0 ? (
+              <p className="text-gray-400 text-sm">No sessions scheduled in the next 14 days.</p>
+            ) : (
+              <div className="space-y-2">
+                {futureSessions.map(s => <SessionCard key={s.id} s={s} />)}
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Outstanding Balances */}

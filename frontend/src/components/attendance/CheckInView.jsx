@@ -45,9 +45,32 @@ function FreeReasonModal({ student, onConfirm, onClose }) {
   );
 }
 
-export default function CheckInView({ scheduleId, students: initialStudents }) {
+export default function CheckInView({ scheduleId, students: initialStudents, schedule }) {
   const [students, setStudents] = useState(initialStudents);
   const [freeModal, setFreeModal] = useState(null); // null | student object
+
+  const now = new Date();
+  const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+  const isFuture = schedule?.date && schedule.date > todayStr;
+
+  function exportCSV() {
+    const rows = [
+      ['Name', 'Status', 'Free Reason'],
+      ...students.map(s => [
+        s.name,
+        s.attendance?.status || 'absent',
+        s.attendance?.free_reason || '',
+      ]),
+    ];
+    const csv = rows.map(r => r.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(',')).join('\n');
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `attendance_${schedule?.date ?? 'export'}_${schedule?.age_category ?? ''}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
 
   function updateStudentAttendance(studentId, attendance) {
     setStudents(prev =>
@@ -85,12 +108,26 @@ export default function CheckInView({ scheduleId, students: initialStudents }) {
 
   return (
     <div>
-      <div className="flex gap-4 mb-4 text-sm text-gray-600">
-        <span>Total: <strong>{students.length}</strong></span>
-        <span className="text-green-700">Present: <strong>{presentCount}</strong></span>
-        <span className="text-yellow-700">Free: <strong>{freeCount}</strong></span>
-        <span className="text-gray-500">Absent: <strong>{students.length - presentCount - freeCount}</strong></span>
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex gap-4 text-sm text-gray-600">
+          <span>Total: <strong>{students.length}</strong></span>
+          <span className="text-green-700">Present: <strong>{presentCount}</strong></span>
+          <span className="text-yellow-700">Free: <strong>{freeCount}</strong></span>
+          <span className="text-gray-500">Absent: <strong>{students.length - presentCount - freeCount}</strong></span>
+        </div>
+        <button
+          onClick={exportCSV}
+          className="border border-gray-300 text-gray-600 px-3 py-1.5 rounded text-sm hover:bg-gray-50"
+        >
+          Export CSV
+        </button>
       </div>
+
+      {isFuture && (
+        <div className="bg-amber-50 border border-amber-200 rounded-lg px-4 py-3 mb-4 text-amber-800 text-sm">
+          Check-in is not available for future sessions.
+        </div>
+      )}
 
       {students.length === 0 && (
         <p className="text-gray-500 text-center py-8">No students in this age category.</p>
@@ -119,16 +156,18 @@ export default function CheckInView({ scheduleId, students: initialStudents }) {
               <div className="flex gap-2">
                 {st !== 'present' && (
                   <button
-                    onClick={() => handleCheckIn(student)}
-                    className="bg-green-600 text-white px-3 py-1.5 rounded text-sm hover:bg-green-700"
+                    onClick={() => !isFuture && handleCheckIn(student)}
+                    disabled={isFuture}
+                    className="bg-green-600 text-white px-3 py-1.5 rounded text-sm hover:bg-green-700 disabled:opacity-40 disabled:cursor-not-allowed"
                   >
                     Check In
                   </button>
                 )}
                 {st !== 'free' && (
                   <button
-                    onClick={() => setFreeModal(student)}
-                    className="bg-yellow-500 text-white px-3 py-1.5 rounded text-sm hover:bg-yellow-600"
+                    onClick={() => !isFuture && setFreeModal(student)}
+                    disabled={isFuture}
+                    className="bg-yellow-500 text-white px-3 py-1.5 rounded text-sm hover:bg-yellow-600 disabled:opacity-40 disabled:cursor-not-allowed"
                   >
                     Free
                   </button>

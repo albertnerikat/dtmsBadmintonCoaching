@@ -21,6 +21,15 @@ router.get('/', async (req, res) => {
     .order('date').order('time');
   if (upErr) return res.status(500).json({ error: upErr.message });
 
+  // Last 2 past sessions (any status)
+  const { data: recent, error: recentErr } = await supabase
+    .from('schedules')
+    .select('*')
+    .lt('date', today)
+    .order('date', { ascending: false }).order('time', { ascending: false })
+    .limit(2);
+  if (recentErr) return res.status(500).json({ error: recentErr.message });
+
   // All present attendance with fees (for balance computation)
   const { data: attended, error: attErr } = await supabase
     .from('attendance')
@@ -68,7 +77,7 @@ router.get('/', async (req, res) => {
       .sort((a, b) => b.balance - a.balance);
   }
 
-  res.json({ upcoming_sessions: upcoming || [], student_balances: studentBalances });
+  res.json({ upcoming_sessions: upcoming || [], recent_sessions: (recent || []).reverse(), student_balances: studentBalances });
 });
 
 module.exports = router;

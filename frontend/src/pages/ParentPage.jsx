@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 
+const API_BASE_URL = import.meta.env.VITE_API_URL || '';
+
 const STATUS_BADGES = {
   present: 'bg-green-100 text-green-800',
   free:    'bg-yellow-100 text-yellow-800',
@@ -13,7 +15,7 @@ export default function ParentPage() {
   const [error, setError] = useState('');
 
   useEffect(() => {
-    fetch(`/api/parent/${token}`)
+    fetch(`${API_BASE_URL}/api/parent/${token}`)
       .then(res => {
         if (!res.ok) throw new Error('Invalid or expired link');
         return res.json();

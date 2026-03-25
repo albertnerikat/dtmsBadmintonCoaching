@@ -44,14 +44,31 @@ router.get('/', async (req, res) => {
   const rangeStartStr = rangeStart.toISOString().slice(0, 10);
   const rangeEndStr   = rangeEnd.toISOString().slice(0, 10);
 
-  // Present attendance with schedule date + fee in range
-  const { data: attended, error: attErr } = await supabase
-    .from('attendance')
-    .select('student_id, schedule:schedules!inner(date, fee)')
-    .eq('status', 'present')
-    .gte('schedules.date', rangeStartStr)
-    .lte('schedules.date', rangeEndStr);
-  if (attErr) return res.status(500).json({ error: attErr.message });
+  // Get all schedules in the date range
+  const { data: schedulesInRange, error: schedErr } = await supabase
+    .from('schedules')
+    .select('id, date, fee')
+    .gte('date', rangeStartStr)
+    .lte('date', rangeEndStr);
+  if (schedErr) return res.status(500).json({ error: schedErr.message });
+
+  const scheduleInfoMap = {};
+  for (const s of schedulesInRange || []) {
+    scheduleInfoMap[s.id] = { date: s.date, fee: s.fee };
+  }
+
+  // Present attendance for those schedules
+  const scheduleIds = Object.keys(scheduleInfoMap);
+  let attended = [];
+  if (scheduleIds.length > 0) {
+    const { data: attRows, error: attErr } = await supabase
+      .from('attendance')
+      .select('student_id, schedule_id')
+      .eq('status', 'present')
+      .in('schedule_id', scheduleIds);
+    if (attErr) return res.status(500).json({ error: attErr.message });
+    attended = attRows || [];
+  }
 
   // Payments in range
   const { data: payments, error: payErr } = await supabase
@@ -74,13 +91,13 @@ router.get('/', async (req, res) => {
     if (!monthData[key].students[sid]) monthData[key].students[sid] = { owed: 0, paid: 0 };
   };
 
-  for (const a of attended || []) {
-    const date = a.schedule?.date;
-    if (!date) continue;
-    const [y, m] = date.split('-').map(Number);
+  for (const a of attended) {
+    const info = scheduleInfoMap[a.schedule_id];
+    if (!info) continue;
+    const [y, m] = info.date.split('-').map(Number);
     const key = ensureMonth(y, m);
     ensureStudent(key, a.student_id);
-    monthData[key].students[a.student_id].owed += Number(a.schedule?.fee || 0);
+    monthData[key].students[a.student_id].owed += Number(info.fee || 0);
   }
 
   for (const p of payments || []) {

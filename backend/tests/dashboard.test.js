@@ -63,11 +63,13 @@ describe('GET /api/dashboard', () => {
     expect(res.status).toBe(401);
   });
 
-  it('returns upcoming_sessions and student_balances arrays', async () => {
+  it('returns upcoming_sessions and financial_summary', async () => {
     const res = await request(app).get('/api/dashboard').set(auth());
     expect(res.status).toBe(200);
     expect(Array.isArray(res.body.upcoming_sessions)).toBe(true);
-    expect(Array.isArray(res.body.student_balances)).toBe(true);
+    expect(res.body.financial_summary).toBeDefined();
+    expect(res.body.financial_summary.current_month).toBeDefined();
+    expect(Array.isArray(res.body.financial_summary.past_months)).toBe(true);
   });
 
   it('includes the upcoming test session', async () => {
@@ -76,11 +78,43 @@ describe('GET /api/dashboard', () => {
     expect(found).toBeDefined();
   });
 
-  it('includes the student with outstanding balance', async () => {
+  it('current_month has label, year, month, and aggregate fields', async () => {
     const res = await request(app).get('/api/dashboard').set(auth());
-    const found = res.body.student_balances.find(s => s.id === studentId);
+    const cm = res.body.financial_summary.current_month;
+    expect(cm).toHaveProperty('label');
+    expect(cm).toHaveProperty('year');
+    expect(cm).toHaveProperty('month');
+    expect(typeof cm.total_owed).toBe('number');
+    expect(typeof cm.total_paid).toBe('number');
+    expect(typeof cm.outstanding).toBe('number');
+    expect(cm.outstanding).toBe(cm.total_owed - cm.total_paid);
+  });
+
+  it('current_month.students includes test student with correct figures', async () => {
+    const res = await request(app).get('/api/dashboard').set(auth());
+    const cm = res.body.financial_summary.current_month;
+    const found = cm.students.find(s => s.id === studentId);
     expect(found).toBeDefined();
-    expect(found.balance).toBe(10); // $20 owed − $10 paid
+    expect(found.owed).toBe(20);   // $20 fee for present session this month
+    expect(found.paid).toBe(10);   // $10 payment made today
+    expect(found.balance).toBe(10);
+  });
+
+  it('past_months has exactly 6 entries', async () => {
+    const res = await request(app).get('/api/dashboard').set(auth());
+    expect(res.body.financial_summary.past_months).toHaveLength(6);
+  });
+
+  it('past_months entries have required shape', async () => {
+    const res = await request(app).get('/api/dashboard').set(auth());
+    const first = res.body.financial_summary.past_months[0];
+    expect(first).toHaveProperty('label');
+    expect(first).toHaveProperty('year');
+    expect(first).toHaveProperty('month');
+    expect(first).toHaveProperty('total_owed');
+    expect(first).toHaveProperty('total_paid');
+    expect(first).toHaveProperty('outstanding');
+    expect(Array.isArray(first.students)).toBe(true);
   });
 });
 

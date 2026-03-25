@@ -15,6 +15,145 @@ const CATEGORY_COLORS = {
   Mixed:  'bg-yellow-100 text-yellow-800',
 };
 
+// Shared student breakdown table — used in both the hero and expanded past months
+function StudentBreakdownTable({ students, navigate, dark }) {
+  return (
+    <table className="w-full text-sm border-collapse">
+      <thead>
+        <tr className={`text-xs ${dark ? 'opacity-70' : 'text-gray-400'}`}>
+          <th className="py-1 px-2 text-left font-medium">Student</th>
+          <th className="py-1 px-2 text-right font-medium">Owed</th>
+          <th className="py-1 px-2 text-right font-medium">Paid</th>
+          <th className="py-1 px-2 text-right font-medium">Balance</th>
+        </tr>
+      </thead>
+      <tbody>
+        {students.map(s => (
+          <tr
+            key={s.id}
+            className={`border-t ${dark ? 'border-white/20' : 'border-gray-100'} ${
+              s.balance > 0 ? (dark ? 'bg-red-500/20' : 'bg-red-50') : ''
+            }`}
+          >
+            <td
+              className={`py-1.5 px-2 underline cursor-pointer ${dark ? '' : 'text-blue-600'}`}
+              onClick={() => navigate(`/ledger/${s.id}`)}
+            >
+              {s.name}
+            </td>
+            <td className="py-1.5 px-2 text-right">${s.owed.toFixed(2)}</td>
+            <td className={`py-1.5 px-2 text-right ${dark ? '' : 'text-green-700'}`}>
+              ${s.paid.toFixed(2)}
+            </td>
+            <td className={`py-1.5 px-2 text-right font-semibold ${
+              s.balance > 0
+                ? (dark ? 'text-red-200' : 'text-red-600')
+                : (dark ? 'opacity-50' : 'text-gray-400')
+            }`}>
+              {s.balance > 0 ? `$${s.balance.toFixed(2)}` : '—'}
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  );
+}
+
+function CurrentMonthHero({ month, navigate }) {
+  return (
+    <div className="bg-gradient-to-br from-blue-700 to-blue-500 rounded-xl p-4 text-white mb-4">
+      <div className="text-xs font-semibold opacity-80 mb-3">{month.label} · Current Month</div>
+      <div className="grid grid-cols-3 gap-3 text-center mb-4">
+        <div>
+          <div className="text-xl font-bold">${month.total_owed.toFixed(2)}</div>
+          <div className="text-xs opacity-70 mt-0.5">Total Owed</div>
+        </div>
+        <div>
+          <div className="text-xl font-bold">${month.total_paid.toFixed(2)}</div>
+          <div className="text-xs opacity-70 mt-0.5">Total Paid</div>
+        </div>
+        <div className="bg-white/15 rounded-lg py-1">
+          <div className="text-xl font-bold">${month.outstanding.toFixed(2)}</div>
+          <div className="text-xs opacity-70 mt-0.5">Outstanding</div>
+        </div>
+      </div>
+      {month.students.length > 0 ? (
+        <div className="bg-white/10 rounded-lg p-3">
+          <StudentBreakdownTable students={month.students} navigate={navigate} dark={true} />
+          <p className="text-xs opacity-50 mt-2 text-right">Click student name → full ledger</p>
+        </div>
+      ) : (
+        <p className="text-xs opacity-60 text-center py-2">No activity this month.</p>
+      )}
+    </div>
+  );
+}
+
+function PastMonthsList({ months, navigate }) {
+  const [expanded, setExpanded] = useState(null);
+
+  const toggle = (key) => setExpanded(prev => prev === key ? null : key);
+
+  return (
+    <div className="bg-white border border-gray-200 rounded-xl p-4">
+      <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">
+        Previous 6 Months
+      </div>
+      <div className="grid grid-cols-4 gap-1 text-xs text-gray-400 uppercase tracking-wide px-2 pb-2">
+        <span>Month</span>
+        <span className="text-right">Owed</span>
+        <span className="text-right">Paid</span>
+        <span className="text-right">Outstanding</span>
+      </div>
+      {months.map(m => {
+        const key = `${m.year}-${m.month}`;
+        const isOpen = expanded === key;
+        const shortLabel = `${m.label.slice(0, 3)} ${String(m.year).slice(2)}`;
+        return (
+          <div
+            key={key}
+            className={`rounded-lg mb-1 overflow-hidden border transition-colors ${
+              isOpen ? 'border-blue-300' : 'border-transparent'
+            }`}
+          >
+            <div
+              onClick={() => toggle(key)}
+              className={`grid grid-cols-4 gap-1 text-sm px-2 py-2 cursor-pointer rounded-lg transition-colors ${
+                isOpen ? 'bg-blue-50' : 'hover:bg-gray-50'
+              }`}
+            >
+              <span className={`font-medium ${isOpen ? 'text-blue-700' : 'text-gray-700'}`}>
+                {shortLabel} {isOpen ? '▴' : '▾'}
+              </span>
+              <span className="text-right">${m.total_owed.toFixed(2)}</span>
+              <span className="text-right text-green-700">${m.total_paid.toFixed(2)}</span>
+              <span className={`text-right font-semibold ${
+                m.outstanding > 0 ? 'text-red-600' : 'text-green-700'
+              }`}>
+                {m.outstanding > 0 ? `$${m.outstanding.toFixed(2)}` : '—'}
+              </span>
+            </div>
+            {isOpen && (
+              <div className="px-3 py-2 bg-gray-50 border-t border-blue-100">
+                {m.students.length > 0 ? (
+                  <>
+                    <StudentBreakdownTable students={m.students} navigate={navigate} dark={false} />
+                    <p className="text-xs text-gray-400 mt-2 text-right">
+                      Click student name → full ledger
+                    </p>
+                  </>
+                ) : (
+                  <p className="text-xs text-gray-400 py-1">No activity this month.</p>
+                )}
+              </div>
+            )}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
 export default function DashboardPage() {
   const navigate = useNavigate();
   const [data, setData] = useState(null);
@@ -27,7 +166,7 @@ export default function DashboardPage() {
   if (loading) return <p className="text-gray-500">Loading dashboard...</p>;
   if (!data) return <p className="text-red-600">Failed to load dashboard.</p>;
 
-  const { upcoming_sessions, recent_sessions, student_balances } = data;
+  const { upcoming_sessions, recent_sessions, financial_summary } = data;
 
   const now = new Date();
   const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
@@ -103,30 +242,11 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* Outstanding Balances */}
+        {/* Financial Summary */}
         <div>
-          <h2 className="text-lg font-semibold mb-3">Outstanding Balances</h2>
-          {student_balances.length === 0 ? (
-            <p className="text-gray-400 text-sm">All students are up to date.</p>
-          ) : (
-            <div className="space-y-2">
-              {student_balances.map(s => (
-                <div
-                  key={s.id}
-                  onClick={() => navigate(`/ledger/${s.id}`)}
-                  className="border rounded-lg p-3 cursor-pointer hover:bg-gray-50 transition-colors flex items-center justify-between"
-                >
-                  <span className="font-medium">{s.name}</span>
-                  <span className={`font-bold text-sm ${s.balance > 0 ? 'text-red-600' : 'text-green-600'}`}>
-                    {s.balance > 0
-                      ? `Owes $${s.balance.toFixed(2)}`
-                      : `Credit $${Math.abs(s.balance).toFixed(2)}`
-                    }
-                  </span>
-                </div>
-              ))}
-            </div>
-          )}
+          <h2 className="text-lg font-semibold mb-3">Financial Summary</h2>
+          <CurrentMonthHero month={financial_summary.current_month} navigate={navigate} />
+          <PastMonthsList months={financial_summary.past_months} navigate={navigate} />
         </div>
 
       </div>

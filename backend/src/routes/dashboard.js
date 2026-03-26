@@ -38,7 +38,7 @@ router.get('/', async (req, res) => {
   // ── Financial Summary ──────────────────────────────────────────────
   const now = new Date();
 
-  // Full range: start of month 6 months ago → end of current month (single DB pass)
+  // Full range: start of month 6 months ago → end of current month (two queries: schedules then attendance)
   const rangeStart = new Date(now.getFullYear(), now.getMonth() - 6, 1);
   const rangeEnd   = new Date(now.getFullYear(), now.getMonth() + 1, 0); // last day of current month
   const rangeStartStr = rangeStart.toISOString().slice(0, 10);

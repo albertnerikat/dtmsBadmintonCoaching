@@ -76,14 +76,49 @@ router.put('/:id', async (req, res) => {
 // POST /api/schedules/:id/cancel
 router.post('/:id/cancel', async (req, res) => {
   const { reason } = req.body;
+
+  const { data: schedule, error: fetchErr } = await supabase
+    .from('schedules').select('*').eq('id', req.params.id).single();
+  if (fetchErr?.code === 'PGRST116') return res.status(404).json({ error: 'Schedule not found' });
+  if (fetchErr) return res.status(500).json({ error: fetchErr.message });
+
+  const today = new Date().toISOString().slice(0, 10);
+  if (schedule.date < today) {
+    return res.status(422).json({ error: 'Cannot cancel a past session.' });
+  }
+
+  const { count, error: attErr } = await supabase
+    .from('attendance')
+    .select('*', { count: 'exact', head: true })
+    .eq('schedule_id', req.params.id)
+    .in('status', ['present', 'free']);
+  if (attErr) return res.status(500).json({ error: attErr.message });
+  if (count > 0) {
+    return res.status(422).json({ error: 'Cannot cancel a session with registered attendance.' });
+  }
+
   const { data, error } = await supabase
     .from('schedules')
     .update({ status: 'cancelled', cancellation_reason: reason || null })
     .eq('id', req.params.id)
     .select().single();
-  if (error?.code === 'PGRST116') return res.status(404).json({ error: 'Schedule not found' });
   if (error) return res.status(500).json({ error: error.message });
   res.json(data);
+});
+
+// DELETE /api/schedules/old — delete sessions older than 1 year
+router.delete('/old', async (req, res) => {
+  const cutoff = new Date();
+  cutoff.setFullYear(cutoff.getFullYear() - 1);
+  const cutoffStr = cutoff.toISOString().slice(0, 10);
+
+  const { data, error } = await supabase
+    .from('schedules')
+    .delete()
+    .lt('date', cutoffStr)
+    .select('id');
+  if (error) return res.status(500).json({ error: error.message });
+  res.json({ deleted: data.length });
 });
 
 // GET /api/schedules/:id/attendance

@@ -114,9 +114,24 @@ export default function SchedulesPage() {
   }
 
   async function handleCancel(id, reason) {
-    await api.post(`/schedules/${id}/cancel`, { reason });
-    await loadSchedules();
-    setModal(null);
+    try {
+      await api.post(`/schedules/${id}/cancel`, { reason });
+      await loadSchedules();
+      setModal(null);
+    } catch (err) {
+      alert(err.message || 'Failed to cancel session.');
+    }
+  }
+
+  async function handleDeleteOld() {
+    if (!window.confirm('Permanently delete all sessions older than 1 year? This cannot be undone.')) return;
+    try {
+      const result = await api.delete('/schedules/old');
+      await loadSchedules();
+      alert(`Deleted ${result.deleted} session(s).`);
+    } catch (err) {
+      alert(err.message || 'Failed to delete old sessions.');
+    }
   }
 
   async function handleAddRecurring(form) {
@@ -198,6 +213,7 @@ export default function SchedulesPage() {
         <ScheduleList
           schedules={schedules}
           onCancel={schedule => setModal({ cancel: schedule })}
+          onDeleteOld={handleDeleteOld}
         />
       )}
 

@@ -19,8 +19,9 @@ const CATEGORY_COLORS = {
 
 const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
-export default function ScheduleList({ schedules, onCancel }) {
+export default function ScheduleList({ schedules, onCancel, onDeleteOld }) {
   const navigate = useNavigate();
+  const today = new Date().toISOString().slice(0, 10);
 
   if (schedules.length === 0) {
     return <p className="text-center text-gray-500 py-12">No sessions found.</p>;
@@ -28,6 +29,16 @@ export default function ScheduleList({ schedules, onCancel }) {
 
   return (
     <div className="overflow-x-auto">
+      {onDeleteOld && (
+        <div className="mb-3 flex justify-end">
+          <button
+            onClick={onDeleteOld}
+            className="text-sm text-gray-500 border border-gray-300 px-3 py-1.5 rounded hover:bg-red-50 hover:text-red-600 hover:border-red-300"
+          >
+            Delete sessions older than 1 year
+          </button>
+        </div>
+      )}
       <table className="w-full text-sm border-collapse">
         <thead>
           <tr className="bg-gray-100 text-left">
@@ -70,12 +81,14 @@ export default function ScheduleList({ schedules, onCancel }) {
                       >
                         Check-in
                       </button>
-                      <button
-                        onClick={() => onCancel(s)}
-                        className="text-red-500 hover:underline"
-                      >
-                        Cancel
-                      </button>
+                      {s.date >= today && (
+                        <button
+                          onClick={() => onCancel(s)}
+                          className="text-red-500 hover:underline"
+                        >
+                          Cancel
+                        </button>
+                      )}
                     </>
                   )}
                 </div>

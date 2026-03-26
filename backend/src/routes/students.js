@@ -31,10 +31,11 @@ router.get('/', async (req, res) => {
   const { data, error } = await supabase
     .from('students')
     .select('*')
-    .eq('status', status)
-    .order('name');
+    .eq('status', status);
   if (error) return res.status(500).json({ error: error.message });
-  res.json(data.map(s => addAgeCategory(decryptStudent(s))));
+  const students = data.map(s => addAgeCategory(decryptStudent(s)));
+  students.sort((a, b) => a.name.localeCompare(b.name));
+  res.json(students);
 });
 
 // GET /api/students/:id

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../lib/api';
 
@@ -15,85 +15,93 @@ const CATEGORY_COLORS = {
   Mixed:  'bg-yellow-100 text-yellow-800',
 };
 
-// Shared student breakdown table — used in both the hero and expanded past months
-function StudentBreakdownTable({ students, navigate, dark }) {
+// Balloon popup showing a student list. Stays open while mouse is over trigger OR balloon.
+function StudentBalloon({ students, navigate, visible, onEnter, onLeave }) {
+  if (!visible || students.length === 0) return null;
   return (
-    <table className="w-full text-sm border-collapse">
-      <thead>
-        <tr className={`text-xs ${dark ? 'opacity-70' : 'text-gray-400'}`}>
-          <th className="py-1 px-2 text-left font-medium">Student</th>
-          <th className="py-1 px-2 text-right font-medium">Owed</th>
-          <th className="py-1 px-2 text-right font-medium">Paid</th>
-          <th className="py-1 px-2 text-right font-medium">Balance</th>
-        </tr>
-      </thead>
-      <tbody>
-        {students.map(s => (
-          <tr
-            key={s.id}
-            className={`border-t ${dark ? 'border-white/20' : 'border-gray-100'} ${
-              s.balance > 0 ? (dark ? 'bg-red-500/20' : 'bg-red-50') : ''
-            }`}
-          >
-            <td
-              className={`py-1.5 px-2 underline cursor-pointer ${dark ? '' : 'text-blue-600'}`}
-              onClick={() => navigate(`/ledger/${s.id}`)}
-            >
-              {s.name}
-            </td>
-            <td className="py-1.5 px-2 text-right">${s.owed.toFixed(2)}</td>
-            <td className={`py-1.5 px-2 text-right ${dark ? '' : 'text-green-700'}`}>
-              ${s.paid.toFixed(2)}
-            </td>
-            <td className={`py-1.5 px-2 text-right font-semibold ${
-              s.balance > 0
-                ? (dark ? 'text-red-200' : 'text-red-600')
-                : (dark ? 'opacity-50' : 'text-gray-400')
-            }`}>
-              {s.balance > 0 ? `$${s.balance.toFixed(2)}` : '—'}
-            </td>
-          </tr>
-        ))}
-      </tbody>
-    </table>
+    <div
+      onMouseEnter={onEnter}
+      onMouseLeave={onLeave}
+      className="absolute left-0 top-full mt-1 z-50 w-full min-w-[260px] bg-white border border-gray-200 rounded-lg shadow-xl p-3"
+    >
+      <div className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">Students</div>
+      {students.map(s => (
+        <div
+          key={s.id}
+          onClick={() => navigate(`/ledger/${s.id}`)}
+          className={`flex items-center justify-between px-2 py-1.5 rounded cursor-pointer hover:bg-gray-100 transition-colors ${
+            s.balance > 0 ? 'bg-red-50' : ''
+          }`}
+        >
+          <span className="text-blue-600 text-sm font-medium">{s.name}</span>
+          <span className={`text-sm font-semibold ml-6 ${s.balance > 0 ? 'text-red-600' : 'text-gray-400'}`}>
+            {s.balance > 0 ? `$${s.balance.toFixed(2)}` : '—'}
+          </span>
+        </div>
+      ))}
+    </div>
   );
 }
 
+// Hook: returns show/scheduleHide handlers and visible state.
+// The balloon stays visible for 150ms after mouse leaves, allowing the cursor to travel to it.
+function useBalloon() {
+  const [visible, setVisible] = useState(false);
+  const timer = useRef(null);
+  const show = () => { clearTimeout(timer.current); setVisible(true); };
+  const scheduleHide = () => { timer.current = setTimeout(() => setVisible(false), 150); };
+  return { visible, show, scheduleHide };
+}
+
 function CurrentMonthHero({ month, navigate }) {
+  const { visible, show, scheduleHide } = useBalloon();
+
   return (
     <div className="bg-gradient-to-br from-blue-700 to-blue-500 rounded-xl p-4 text-white mb-4">
       <div className="text-xs font-semibold opacity-80 mb-3">{month.label} · Current Month</div>
-      <div className="grid grid-cols-3 gap-3 text-center mb-4">
-        <div>
-          <div className="text-xl font-bold">${month.total_owed.toFixed(2)}</div>
-          <div className="text-xs opacity-70 mt-0.5">Total Owed</div>
+
+      {/* Stats row — hover triggers the balloon */}
+      <div
+        className="relative"
+        onMouseEnter={show}
+        onMouseLeave={scheduleHide}
+      >
+        <div className="grid grid-cols-3 gap-3 text-center cursor-default">
+          <div>
+            <div className="text-xl font-bold">${month.total_owed.toFixed(2)}</div>
+            <div className="text-xs opacity-70 mt-0.5">Total Owed</div>
+          </div>
+          <div>
+            <div className="text-xl font-bold">${month.total_paid.toFixed(2)}</div>
+            <div className="text-xs opacity-70 mt-0.5">Total Paid</div>
+          </div>
+          <div className="bg-white/15 rounded-lg py-1">
+            <div className="text-xl font-bold">${month.outstanding.toFixed(2)}</div>
+            <div className="text-xs opacity-70 mt-0.5">Outstanding</div>
+          </div>
         </div>
-        <div>
-          <div className="text-xl font-bold">${month.total_paid.toFixed(2)}</div>
-          <div className="text-xs opacity-70 mt-0.5">Total Paid</div>
-        </div>
-        <div className="bg-white/15 rounded-lg py-1">
-          <div className="text-xl font-bold">${month.outstanding.toFixed(2)}</div>
-          <div className="text-xs opacity-70 mt-0.5">Outstanding</div>
-        </div>
+        {month.students.length > 0 && (
+          <StudentBalloon
+            students={month.students}
+            navigate={navigate}
+            visible={visible}
+            onEnter={show}
+            onLeave={scheduleHide}
+          />
+        )}
       </div>
-      {month.students.length > 0 ? (
-        <div className="bg-white/10 rounded-lg p-3">
-          <StudentBreakdownTable students={month.students} navigate={navigate} dark={true} />
-          <p className="text-xs opacity-50 mt-2 text-right">Click student name → full ledger</p>
-        </div>
-      ) : (
-        <p className="text-xs opacity-60 text-center py-2">No activity this month.</p>
+
+      {month.students.length === 0 && (
+        <p className="text-xs opacity-60 text-center mt-3">No activity this month.</p>
+      )}
+      {month.students.length > 0 && (
+        <p className="text-xs opacity-40 text-center mt-3">Hover to see students</p>
       )}
     </div>
   );
 }
 
 function PastMonthsList({ months, navigate }) {
-  const [expanded, setExpanded] = useState(null);
-
-  const toggle = (key) => setExpanded(prev => prev === key ? null : key);
-
   return (
     <div className="bg-white border border-gray-200 rounded-xl p-4">
       <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">
@@ -105,51 +113,46 @@ function PastMonthsList({ months, navigate }) {
         <span className="text-right">Paid</span>
         <span className="text-right">Outstanding</span>
       </div>
-      {months.map(m => {
-        const key = `${m.year}-${m.month}`;
-        const isOpen = expanded === key;
-        const shortLabel = `${m.label.slice(0, 3)} ${String(m.year).slice(2)}`;
-        return (
-          <div
-            key={key}
-            className={`rounded-lg mb-1 overflow-hidden border transition-colors ${
-              isOpen ? 'border-blue-300' : 'border-transparent'
-            }`}
-          >
-            <div
-              onClick={() => toggle(key)}
-              className={`grid grid-cols-4 gap-1 text-sm px-2 py-2 cursor-pointer rounded-lg transition-colors ${
-                isOpen ? 'bg-blue-50' : 'hover:bg-gray-50'
-              }`}
-            >
-              <span className={`font-medium ${isOpen ? 'text-blue-700' : 'text-gray-700'}`}>
-                {shortLabel} {isOpen ? '▴' : '▾'}
-              </span>
-              <span className="text-right">${m.total_owed.toFixed(2)}</span>
-              <span className="text-right text-green-700">${m.total_paid.toFixed(2)}</span>
-              <span className={`text-right font-semibold ${
-                m.outstanding > 0 ? 'text-red-600' : 'text-green-700'
-              }`}>
-                {m.outstanding > 0 ? `$${m.outstanding.toFixed(2)}` : '—'}
-              </span>
-            </div>
-            {isOpen && (
-              <div className="px-3 py-2 bg-gray-50 border-t border-blue-100">
-                {m.students.length > 0 ? (
-                  <>
-                    <StudentBreakdownTable students={m.students} navigate={navigate} dark={false} />
-                    <p className="text-xs text-gray-400 mt-2 text-right">
-                      Click student name → full ledger
-                    </p>
-                  </>
-                ) : (
-                  <p className="text-xs text-gray-400 py-1">No activity this month.</p>
-                )}
-              </div>
-            )}
-          </div>
-        );
-      })}
+      {months.map(m => (
+        <MonthRow key={`${m.year}-${m.month}`} m={m} navigate={navigate} />
+      ))}
+    </div>
+  );
+}
+
+function MonthRow({ m, navigate }) {
+  const { visible, show, scheduleHide } = useBalloon();
+  const shortLabel = `${m.label.slice(0, 3)} ${String(m.year).slice(2)}`;
+
+  return (
+    <div
+      className="relative rounded-lg mb-1"
+      onMouseEnter={show}
+      onMouseLeave={scheduleHide}
+    >
+      <div className={`grid grid-cols-4 gap-1 text-sm px-2 py-2 rounded-lg transition-colors cursor-default ${
+        visible ? 'bg-blue-50' : 'hover:bg-gray-50'
+      }`}>
+        <span className={`font-medium ${visible ? 'text-blue-700' : 'text-gray-700'}`}>
+          {shortLabel}
+        </span>
+        <span className="text-right">${m.total_owed.toFixed(2)}</span>
+        <span className="text-right text-green-700">${m.total_paid.toFixed(2)}</span>
+        <span className={`text-right font-semibold ${
+          m.outstanding > 0 ? 'text-red-600' : 'text-green-700'
+        }`}>
+          {m.outstanding > 0 ? `$${m.outstanding.toFixed(2)}` : '—'}
+        </span>
+      </div>
+      {m.students.length > 0 && (
+        <StudentBalloon
+          students={m.students}
+          navigate={navigate}
+          visible={visible}
+          onEnter={show}
+          onLeave={scheduleHide}
+        />
+      )}
     </div>
   );
 }

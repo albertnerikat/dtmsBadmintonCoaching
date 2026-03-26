@@ -35,6 +35,30 @@ router.get('/', async (req, res) => {
     .limit(2);
   if (recentErr) return res.status(500).json({ error: recentErr.message });
 
+  // ── Session Stats (all-time past sessions) ─────────────────────────
+  const { count: totalSessions, error: totalErr } = await supabase
+    .from('schedules')
+    .select('*', { count: 'exact', head: true })
+    .lt('date', today);
+  if (totalErr) return res.status(500).json({ error: totalErr.message });
+
+  const { data: attStatusRows, error: attStatusErr } = await supabase
+    .from('attendance')
+    .select('status');
+  if (attStatusErr) return res.status(500).json({ error: attStatusErr.message });
+
+  const statusCounts = { present: 0, free: 0, absent: 0 };
+  for (const a of attStatusRows || []) {
+    if (statusCounts[a.status] !== undefined) statusCounts[a.status]++;
+  }
+
+  const session_stats = {
+    total: totalSessions || 0,
+    present: statusCounts.present,
+    free: statusCounts.free,
+    absent: statusCounts.absent,
+  };
+
   // ── Financial Summary ──────────────────────────────────────────────
   const now = new Date();
 
@@ -169,6 +193,7 @@ router.get('/', async (req, res) => {
   res.json({
     upcoming_sessions: upcoming || [],
     recent_sessions: (recent || []).reverse(),
+    session_stats,
     financial_summary: { current_month, past_months },
   });
 });

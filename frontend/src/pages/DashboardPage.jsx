@@ -53,6 +53,44 @@ function useBalloon() {
   return { visible, show, scheduleHide };
 }
 
+function PastSessionsHeading({ stats }) {
+  const { visible, show, scheduleHide } = useBalloon();
+  return (
+    <div className="relative inline-block mb-3" onMouseEnter={show} onMouseLeave={scheduleHide}>
+      <h2 className="text-lg font-semibold cursor-default">
+        Past Sessions <span className="text-gray-400 font-normal text-sm">(last 2)</span>
+      </h2>
+      {visible && (
+        <div
+          onMouseEnter={show}
+          onMouseLeave={scheduleHide}
+          className="absolute left-0 top-full mt-1 z-50 bg-white border border-gray-200 rounded-lg shadow-xl p-3 whitespace-nowrap"
+        >
+          <div className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">All-Time</div>
+          <div className="space-y-1 text-sm">
+            <div className="flex justify-between gap-6">
+              <span className="text-gray-600">Total sessions</span>
+              <span className="font-semibold">{stats.total}</span>
+            </div>
+            <div className="flex justify-between gap-6">
+              <span className="text-gray-600">Present</span>
+              <span className="font-semibold text-green-700">{stats.present}</span>
+            </div>
+            <div className="flex justify-between gap-6">
+              <span className="text-gray-600">Free</span>
+              <span className="font-semibold text-yellow-600">{stats.free}</span>
+            </div>
+            <div className="flex justify-between gap-6">
+              <span className="text-gray-600">Absent</span>
+              <span className="font-semibold text-red-600">{stats.absent}</span>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 function CurrentMonthHero({ month, navigate }) {
   const { visible, show, scheduleHide } = useBalloon();
 
@@ -169,7 +207,7 @@ export default function DashboardPage() {
   if (loading) return <p className="text-gray-500">Loading dashboard...</p>;
   if (!data) return <p className="text-red-600">Failed to load dashboard.</p>;
 
-  const { upcoming_sessions, recent_sessions, financial_summary } = data;
+  const { upcoming_sessions, recent_sessions, session_stats, financial_summary } = data;
 
   const now = new Date();
   const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
@@ -206,9 +244,7 @@ export default function DashboardPage() {
         <div className="space-y-6">
           {/* Past Sessions */}
           <div>
-            <h2 className="text-lg font-semibold mb-3">
-              Past Sessions <span className="text-gray-400 font-normal text-sm">(last 2)</span>
-            </h2>
+            <PastSessionsHeading stats={session_stats} />
             {recent_sessions.length === 0 ? (
               <p className="text-gray-400 text-sm">No past sessions.</p>
             ) : (

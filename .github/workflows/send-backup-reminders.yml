@@ -10,4 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Trigger backup reminders
-        run: curl -s -X POST "https://dtmsbadmintoncoaching-backend.onrender.com/api/backups/send-reminder" -H "x-cron-key: 699a93cfa5f0f24c6c0456617f332426" -H "content-type: application/json"
+        run: |
+          curl -X POST https://dtmsbadmintoncoaching-backend.onrender.com/api/backups/send-reminder \
+          -H 'x-cron-key: 699a93cfa5f0f24c6c0456617f332426' \
+          -H 'content-type: application/json'

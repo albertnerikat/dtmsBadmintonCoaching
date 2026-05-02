@@ -213,4 +213,99 @@ router.get('/period-outstanding/:student_id/details', async (req, res) => {
   }
 });
 
+/**
+ * POST /api/reports/export-pdf
+ * Generate PDF from report data sent from frontend
+ */
+router.post('/export-pdf', async (req, res) => {
+  try {
+    const { period, summary, students } = req.body;
+
+    const PDFDocument = require('pdfkit');
+    const doc = new PDFDocument({ margin: 50 });
+
+    // Set response headers
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader(
+      'Content-Disposition',
+      `attachment; filename="reports_outstanding_${period.start_date}_to_${period.end_date}.pdf"`
+    );
+
+    doc.pipe(res);
+
+    // Title
+    doc.fontSize(20).font('Helvetica-Bold').text('Period Outstanding Report', { align: 'center' });
+    doc.moveDown(0.5);
+
+    // Date range
+    doc.fontSize(12).font('Helvetica').text(
+      `Report Period: ${period.start_date} to ${period.end_date}`,
+      { align: 'center' }
+    );
+    doc.moveDown(1);
+
+    // Summary section
+    doc.fontSize(14).font('Helvetica-Bold').text('Summary', { underline: true });
+    doc.fontSize(11).font('Helvetica');
+    doc.text(`Total Students: ${summary.total_students}`);
+    doc.text(`Total Previous Balance: $${summary.total_previous_balance.toFixed(2)}`);
+    doc.text(`Total Period Outstanding: $${summary.total_period_outstanding.toFixed(2)}`);
+    doc.text(`Total Outstanding: $${summary.total_outstanding.toFixed(2)}`, { color: 'red' });
+    doc.moveDown(1);
+
+    // Student table header
+    doc.fontSize(12).font('Helvetica-Bold').text('Student Details');
+    doc.moveDown(0.5);
+
+    const tableTop = doc.y;
+    const col1 = 50;
+    const col2 = 150;
+    const col3 = 250;
+    const col4 = 350;
+    const col5 = 450;
+    const rowHeight = 20;
+
+    // Table header row
+    doc.fontSize(10).font('Helvetica-Bold');
+    doc.text('Student Name', col1, tableTop);
+    doc.text('Age Category', col2, tableTop);
+    doc.text('Previous Bal.', col3, tableTop);
+    doc.text('Period Out.', col4, tableTop);
+    doc.text('Total Out.', col5, tableTop);
+
+    // Table divider
+    doc.moveTo(col1, tableTop + rowHeight - 5).lineTo(550, tableTop + rowHeight - 5).stroke();
+
+    // Table data rows
+    doc.font('Helvetica').fontSize(9);
+    let y = tableTop + rowHeight;
+
+    students.forEach((student, idx) => {
+      // Check page overflow
+      if (y > 750) {
+        doc.addPage();
+        y = 50;
+      }
+
+      doc.text(student.name.substring(0, 20), col1, y);
+      doc.text(student.age_category, col2, y);
+      doc.text(`$${student.previous_balance.toFixed(2)}`, col3, y);
+      doc.text(`$${student.period_outstanding.toFixed(2)}`, col4, y);
+
+      // Color total outstanding red if > 0
+      if (student.total_outstanding > 0) {
+        doc.fillColor('red');
+      }
+      doc.text(`$${student.total_outstanding.toFixed(2)}`, col5, y);
+      doc.fillColor('black');
+
+      y += rowHeight;
+    });
+
+    doc.end();
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 module.exports = router;

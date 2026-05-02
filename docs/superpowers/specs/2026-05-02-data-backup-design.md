@@ -11,6 +11,8 @@ A manual, on-demand data backup feature that allows coaches to export the entire
 
 Users trigger backups manually via a button in the UI, download the SQL file to their local machine, and can restore it anytime using Supabase tools or standard PostgreSQL tools.
 
+**Monthly Email Reminders:** Configured email addresses receive monthly reminders to generate and store backups. Coaches can add/remove email addresses for reminders via a settings page.
+
 ---
 
 ## 2. Requirements
@@ -32,6 +34,25 @@ Users trigger backups manually via a button in the UI, download the SQL file to 
 - Browser automatically downloads SQL file
 - Success message after download
 - Error handling if export fails
+
+**Monthly Email Reminders:**
+- Cron job runs monthly on the 1st at 9:00 AM (coach's timezone)
+- Sends email to all configured reminder email addresses
+- Email subject: "Monthly Backup Reminder — [App Name]"
+- Email body includes:
+  - Link to backup page: `/backups`
+  - Quick instructions on how to generate backup
+  - Last backup date (if available)
+- Emails sent via SendGrid or similar service (free tier available)
+
+**Reminder Email Management:**
+- New settings page: `/settings/backup-reminders`
+- Shows list of email addresses receiving reminders
+- Input field to add new email (validated format)
+- Delete button next to each email
+- Confirm before deleting
+- Default: albert.babu@gmail.com (can be removed/changed)
+- Supports multiple emails
 
 **What Gets Backed Up:**
 - All 6 tables: students, schedules, attendance, recurring_schedules, payments, age_categories
@@ -90,6 +111,12 @@ All 6 tables with all columns:
 
 6. **age_categories**
    - id, category_name, created_at (if this table exists)
+
+7. **backup_reminder_emails** (NEW TABLE)
+   - id (UUID primary key)
+   - email (TEXT, unique, required) — Email address to receive monthly reminders
+   - created_at (TIMESTAMPTZ) — When email was added
+   - verified (BOOLEAN, default false) — Email verification status (optional for v1)
 
 ### 3.2 Decryption During Backup
 
@@ -226,13 +253,19 @@ User can retry
 ### 6.1 Backend
 
 **New files:**
-- `backend/src/routes/backups.js` — Backup route handler
-- `backend/src/lib/backupUtils.js` — SQL dump generation logic (optional, if complex)
+- `backend/src/routes/backups.js` — Backup and reminder email routes
+- `backend/src/lib/backupUtils.js` — SQL dump generation logic
+- `backend/src/lib/emailService.js` — Email sending via SendGrid
+- `backend/src/jobs/backupReminder.js` — Cron job for monthly reminders
 
 **Changes:**
 - `backend/src/app.js` — Add backups route
+- `backend/package.json` — Add email service library (SendGrid or similar)
+- `.env.example` — Add SENDGRID_API_KEY or EMAIL_SERVICE_KEY
 
 **Logic to implement:**
+
+*Backup Export:*
 - Fetch all data from all 6 tables via Supabase
 - Decrypt student names using existing encryption library
 - Format as valid PostgreSQL SQL dump
@@ -240,24 +273,54 @@ User can retry
 - Return as file attachment
 - Error handling for database queries, decryption failures
 
+*Email Reminders:*
+- Monthly cron job (1st of month, 9 AM)
+- Query all emails from backup_reminder_emails table
+- Send reminder email to each address
+- Email includes link to backup page and instructions
+- Log email send success/failure
+- Handle email service errors gracefully
+
+*Reminder Email Management:*
+- GET /api/backups/reminders — List configured emails
+- POST /api/backups/reminders — Add new email
+- DELETE /api/backups/reminders/:id — Remove email
+- All require authentication
+
 ### 6.2 Frontend
 
 **New files:**
 - `frontend/src/components/backups/BackupButton.jsx` — Backup trigger button
+- `frontend/src/pages/BackupSettingsPage.jsx` — Email reminder management page
 
 **Changes:**
-- `frontend/src/pages/DashboardPage.jsx` — Add backup button (or location of choice)
+- `frontend/src/pages/DashboardPage.jsx` — Add backup button
+- `frontend/src/App.jsx` — Add route for `/settings/backup-reminders`
+- `frontend/src/components/layout/Navbar.jsx` — Add settings link (if not already present)
 
 **Logic to implement:**
+
+*Backup Button:*
 - Button with loading state
 - API call to POST /api/backups/export
 - Handle response and trigger download
 - Show success/error toast
 - User-friendly error messages
 
+*Backup Settings Page:*
+- Fetch list of reminder emails from GET /api/backups/reminders
+- Display emails in a list with delete buttons
+- Input field to add new email
+- Form validation (valid email format)
+- Add button makes POST to /api/backups/reminders
+- Delete button makes DELETE to /api/backups/reminders/:id with confirmation
+- Show success/error messages for add/delete actions
+- Default email (albert.babu@gmail.com) shown with note
+
 **Libraries to use:**
 - Built-in fetch API for download handling
 - Existing toast/notification system (already in app)
+- Email validation regex or library
 
 ### 6.3 Database
 
@@ -345,6 +408,7 @@ psql -h your-host -U postgres -d your-db < backup_2026-05-02_14-30-45.sql
 
 ## 11. Success Criteria
 
+**Backup Export:**
 ✅ Backup button accessible and easy to find  
 ✅ SQL file downloads in < 5 seconds  
 ✅ File is valid SQL (can be imported to Supabase)  
@@ -355,5 +419,17 @@ psql -h your-host -U postgres -d your-db < backup_2026-05-02_14-30-45.sql
 ✅ Authentication required (coach only)  
 ✅ No sensitive data logged/stored on server  
 ✅ Restoration instructions provided to user  
+
+**Email Reminders:**
+✅ Default email (albert.babu@gmail.com) added to system  
+✅ Monthly reminder email sent on 1st of month at 9 AM  
+✅ Email includes link to backup page and instructions  
+✅ Settings page accessible at `/settings/backup-reminders`  
+✅ Can add new reminder emails via form  
+✅ Can remove reminder emails with confirmation  
+✅ Email validation prevents invalid formats  
+✅ Email send failures logged but don't break app  
+✅ Cron job reliable and runs monthly  
+✅ User sees success/error messages for email management actions  
 
 ---

@@ -13,11 +13,7 @@ jobs:
 
     steps:
       - name: Send backup reminder emails
-        run: |
-          curl -X POST https://dtmsbadmintoncoaching-backend.onrender.com/api/backups/send-reminder \
-            -H "Content-Type: application/json" \
-            -H "X-Cron-Key: 699a93cfa5f0f24c6c0456617f332426" \
-            -w "\nHTTP Status: %{http_code}\n"
+        run: curl -X POST https://dtmsbadmintoncoaching-backend.onrender.com/api/backups/send-reminder -H "Content-Type: application/json" -H "X-Cron-Key: 699a93cfa5f0f24c6c0456617f332426" -w "\nHTTP Status: %{http_code}\n"
 
       - name: Log completion
         if: success()

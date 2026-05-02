@@ -69,9 +69,22 @@ export function exportAsCSV(reportData) {
  */
 export async function exportAsPDF(reportData) {
   try {
+    // Import getToken to get authentication token
+    const { getToken } = await import('./auth');
+    const token = getToken();
+
+    const headers = {
+      'Content-Type': 'application/json',
+    };
+
+    // Add Authorization header if token exists
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+
     const response = await fetch('/api/reports/export-pdf', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers,
       body: JSON.stringify(reportData),
     });
 

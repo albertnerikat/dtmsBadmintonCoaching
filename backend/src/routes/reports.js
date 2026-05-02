@@ -258,45 +258,55 @@ router.post('/export-pdf', async (req, res) => {
     doc.moveDown(0.5);
 
     const tableTop = doc.y;
-    const col1 = 50;
-    const col2 = 150;
-    const col3 = 250;
-    const col4 = 350;
-    const col5 = 450;
-    const rowHeight = 20;
+    // Calculate column widths to fit page (page width 595, margins 50 each = 495 usable)
+    const pageWidth = 495;
+    const col1X = 50;
+    const col2X = 180;
+    const col3X = 280;
+    const col4X = 370;
+    const col5X = 450;
+    const rowHeight = 18;
 
     // Table header row
     doc.fontSize(10).font('Helvetica-Bold');
-    doc.text('Student Name', col1, tableTop);
-    doc.text('Age Category', col2, tableTop);
-    doc.text('Previous Bal.', col3, tableTop);
-    doc.text('Period Out.', col4, tableTop);
-    doc.text('Total Out.', col5, tableTop);
+    doc.text('Name', col1X, tableTop, { width: 130 });
+    doc.text('Age Cat.', col2X, tableTop, { width: 100 });
+    doc.text('Prev Bal', col3X, tableTop, { width: 90, align: 'right' });
+    doc.text('Period', col4X, tableTop, { width: 80, align: 'right' });
+    doc.text('Total', col5X, tableTop, { width: 45, align: 'right' });
 
     // Table divider
-    doc.moveTo(col1, tableTop + rowHeight - 5).lineTo(550, tableTop + rowHeight - 5).stroke();
+    doc.moveTo(col1X, tableTop + rowHeight - 3).lineTo(col5X + 45, tableTop + rowHeight - 3).stroke();
 
     // Table data rows
-    doc.font('Helvetica').fontSize(9);
+    doc.font('Helvetica').fontSize(8);
     let y = tableTop + rowHeight;
 
-    students.forEach((student, idx) => {
-      // Check page overflow
+    students.forEach((student) => {
+      // Check page overflow (750 is near bottom of letter page)
       if (y > 750) {
         doc.addPage();
         y = 50;
       }
 
-      doc.text(student.name.substring(0, 20), col1, y);
-      doc.text(student.age_category, col2, y);
-      doc.text(`$${student.previous_balance.toFixed(2)}`, col3, y);
-      doc.text(`$${student.period_outstanding.toFixed(2)}`, col4, y);
+      // Truncate long names
+      const name = student.name.substring(0, 20);
+      const category = student.age_category || 'N/A';
+      const prevBal = `$${student.previous_balance.toFixed(2)}`;
+      const periodOut = `$${student.period_outstanding.toFixed(2)}`;
+      const totalOut = `$${student.total_outstanding.toFixed(2)}`;
+
+      // Draw text in columns
+      doc.text(name, col1X, y, { width: 130 });
+      doc.text(category, col2X, y, { width: 100 });
+      doc.text(prevBal, col3X, y, { width: 90, align: 'right' });
+      doc.text(periodOut, col4X, y, { width: 80, align: 'right' });
 
       // Color total outstanding red if > 0
       if (student.total_outstanding > 0) {
         doc.fillColor('red');
       }
-      doc.text(`$${student.total_outstanding.toFixed(2)}`, col5, y);
+      doc.text(totalOut, col5X, y, { width: 45, align: 'right' });
       doc.fillColor('black');
 
       y += rowHeight;

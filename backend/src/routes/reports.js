@@ -221,15 +221,38 @@ router.post('/export-pdf', async (req, res) => {
   try {
     const { period, summary, students } = req.body;
 
+    // Validate required data
+    if (!period || !summary || !students) {
+      console.error('Missing required fields:', { period: !!period, summary: !!summary, students: !!students });
+      return res.status(400).json({ error: 'Missing required fields: period, summary, or students' });
+    }
+
+    if (!Array.isArray(students) || students.length === 0) {
+      console.error('Students must be a non-empty array');
+      return res.status(400).json({ error: 'Students data is invalid or empty' });
+    }
+
     const PDFDocument = require('pdfkit');
     const doc = new PDFDocument({ margin: 50 });
 
-    // Set response headers
+    // Set response headers BEFORE any error can occur after piping
     res.setHeader('Content-Type', 'application/pdf');
     res.setHeader(
       'Content-Disposition',
       `attachment; filename="reports_outstanding_${period.start_date}_to_${period.end_date}.pdf"`
     );
+
+    // Handle doc errors
+    doc.on('error', (err) => {
+      console.error('PDFDocument error:', err);
+      if (!res.headersSent) {
+        res.status(500).json({ error: `PDF generation error: ${err.message}` });
+      }
+    });
+
+    res.on('error', (err) => {
+      console.error('Response error:', err);
+    });
 
     doc.pipe(res);
 
@@ -314,7 +337,13 @@ router.post('/export-pdf', async (req, res) => {
 
     doc.end();
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error('PDF export error:', error);
+    if (!res.headersSent) {
+      res.status(500).json({ error: `Failed to generate PDF: ${error.message}` });
+    } else {
+      // Headers already sent, can't send error response
+      console.error('Could not send error response - headers already sent');
+    }
   }
 });
 

@@ -76,7 +76,18 @@ export async function exportAsPDF(reportData) {
     });
 
     if (!response.ok) {
-      throw new Error('Failed to generate PDF');
+      // Try to get error message from backend response
+      let errorMsg = 'Failed to generate PDF';
+      try {
+        const errorData = await response.json();
+        if (errorData.error) {
+          errorMsg = errorData.error;
+        }
+      } catch (parseError) {
+        // If response is not JSON, use status text
+        errorMsg = `${response.status}: ${response.statusText}`;
+      }
+      throw new Error(errorMsg);
     }
 
     const blob = await response.blob();
@@ -89,6 +100,7 @@ export async function exportAsPDF(reportData) {
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
   } catch (error) {
+    console.error('PDF export error:', error);
     alert(`Error exporting PDF: ${error.message}`);
   }
 }

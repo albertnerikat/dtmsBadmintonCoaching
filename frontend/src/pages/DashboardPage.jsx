@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../lib/api';
+import BackupButton from '../components/backups/BackupButton';
 
 const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
@@ -234,7 +235,10 @@ export default function DashboardPage() {
 
   return (
     <div>
-      <h1 className="text-xl font-bold mb-6">Dashboard</h1>
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-xl font-bold">Dashboard</h1>
+        <BackupButton />
+      </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 

@@ -10,6 +10,7 @@ import DashboardPage from './pages/DashboardPage';
 import LedgerPage from './pages/LedgerPage';
 import ParentPage from './pages/ParentPage';
 import ReportsPage from './pages/ReportsPage';
+import BackupSettingsPage from './pages/BackupSettingsPage';
 
 function CoachLayout({ children }) {
   return (
@@ -40,6 +41,7 @@ export default function App() {
           <Route path="/attendance/:scheduleId" element={<ProtectedCoachPage><AttendancePage /></ProtectedCoachPage>} />
           <Route path="/ledger/:studentId" element={<ProtectedCoachPage><LedgerPage /></ProtectedCoachPage>} />
           <Route path="/reports" element={<ProtectedCoachPage><ReportsPage /></ProtectedCoachPage>} />
+          <Route path="/settings/backup-reminders" element={<ProtectedCoachPage><BackupSettingsPage /></ProtectedCoachPage>} />
           <Route path="/parent/:token" element={<ParentPage />} />
           <Route path="*" element={<Navigate to="/dashboard" replace />} />
         </Routes>

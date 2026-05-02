@@ -1,27 +1,19 @@
-name: Monthly Backup Reminder
+name: Monthly Backup Reminder v2
 
 on:
   schedule:
-    # Runs at 9 AM UTC on the 1st of every month
     - cron: '0 9 1 * *'
-  # Allow manual trigger from Actions tab
   workflow_dispatch:
 
 jobs:
   send-backup-reminder:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Send backup reminder emails
+      - name: Send backup reminder
         run: |
-          curl -X POST https://dtmsbadmintoncoaching-backend.onrender.com/api/backups/send-reminder \
-            -H "Content-Type: application/json" \
-            -H "x-cron-key: 699a93cfa5f0f24c6c0456617f332426"
-
-      - name: Log completion
-        if: success()
-        run: echo "✅ Backup reminder emails sent successfully"
-
-      - name: Log failure
-        if: failure()
-        run: echo "❌ Failed to send backup reminders"
+          echo "Sending backup reminder to backend..."
+          curl -s -X POST https://dtmsbadmintoncoaching-backend.onrender.com/api/backups/send-reminder \
+            -H "content-type: application/json" \
+            -H "x-cron-key: 699a93cfa5f0f24c6c0456617f332426" \
+            -w "\nStatus: %{http_code}\n"
+          echo "Backup reminder request completed"

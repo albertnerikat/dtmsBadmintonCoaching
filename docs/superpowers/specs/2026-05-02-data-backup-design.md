@@ -36,14 +36,15 @@ Users trigger backups manually via a button in the UI, download the SQL file to 
 - Error handling if export fails
 
 **Monthly Email Reminders:**
-- Cron job runs monthly on the 1st at 9:00 AM (coach's timezone)
-- Sends email to all configured reminder email addresses
-- Email subject: "Monthly Backup Reminder — [App Name]"
+- External cron service (EasyCron.com - free tier) pings `/api/backups/send-reminder` monthly
+- Cron trigger: 1st of each month at 9:00 AM
+- Backend endpoint sends email to all configured reminder email addresses
+- Email subject: "Monthly Backup Reminder — DTMS Badminton Coaching"
 - Email body includes:
-  - Link to backup page: `/backups`
-  - Quick instructions on how to generate backup
-  - Last backup date (if available)
-- Emails sent via SendGrid or similar service (free tier available)
+  - Link to backup page with one-click access
+  - Quick 2-step instructions on how to generate backup
+  - Last backup date (if available in database)
+- Emails sent via Nodemailer (free tier SMTP or SendGrid - free tier available)
 
 **Reminder Email Management:**
 - New settings page: `/settings/backup-reminders`
@@ -207,6 +208,31 @@ ALTER TABLE payments ADD CONSTRAINT fk_student
   FOREIGN KEY (student_id) REFERENCES students(id);
 ```
 
+### 4.3 External Cron Service Integration
+
+**Service:** EasyCron.com (free tier)
+
+**Setup Steps (one-time):**
+1. Sign up at https://easycron.com
+2. Create new cron job
+3. URL: `https://your-render-domain.com/api/backups/send-reminder`
+4. Method: POST
+5. Schedule: Monthly, 1st of month, 09:00 AM UTC
+6. Optional: Add header `X-Cron-Key: your-secret-key` for security
+7. Enable job
+
+**How it works:**
+- EasyCron calls your backend endpoint monthly
+- Endpoint queries database for all reminder emails
+- Nodemailer sends email to each address
+- Logs success/failure
+- Returns 200 OK
+
+**Alternative Cron Services:**
+- cron-job.org (also free)
+- SchedulerService.com
+- Or any HTTP-based cron service
+
 ---
 
 ## 5. UI/UX Design
@@ -255,17 +281,16 @@ User can retry
 **New files:**
 - `backend/src/routes/backups.js` — Backup and reminder email routes
 - `backend/src/lib/backupUtils.js` — SQL dump generation logic
-- `backend/src/lib/emailService.js` — Email sending via SendGrid
-- `backend/src/jobs/backupReminder.js` — Cron job for monthly reminders
+- `backend/src/lib/emailService.js` — Email sending via Nodemailer
 
 **Changes:**
 - `backend/src/app.js` — Add backups route
-- `backend/package.json` — Add email service library (SendGrid or similar)
-- `.env.example` — Add SENDGRID_API_KEY or EMAIL_SERVICE_KEY
+- `backend/package.json` — Add nodemailer library
+- `.env.example` — Add EMAIL_USER, EMAIL_PASS, SMTP_HOST (for email service)
 
 **Logic to implement:**
 
-*Backup Export:*
+*Backup Export (POST /api/backups/export):*
 - Fetch all data from all 6 tables via Supabase
 - Decrypt student names using existing encryption library
 - Format as valid PostgreSQL SQL dump
@@ -273,19 +298,29 @@ User can retry
 - Return as file attachment
 - Error handling for database queries, decryption failures
 
-*Email Reminders:*
-- Monthly cron job (1st of month, 9 AM)
+*Send Reminder Emails (POST /api/backups/send-reminder):*
+- Called by external cron service (EasyCron) monthly
 - Query all emails from backup_reminder_emails table
 - Send reminder email to each address
-- Email includes link to backup page and instructions
+- Email body includes:
+  - App link to backup page
+  - Step-by-step instructions
+  - Last backup date (if available)
 - Log email send success/failure
 - Handle email service errors gracefully
+- Return 200 OK on success
 
 *Reminder Email Management:*
-- GET /api/backups/reminders — List configured emails
-- POST /api/backups/reminders — Add new email
-- DELETE /api/backups/reminders/:id — Remove email
-- All require authentication
+- GET /api/backups/reminders — List configured emails (requires auth)
+- POST /api/backups/reminders — Add new email (requires auth)
+- DELETE /api/backups/reminders/:id — Remove email (requires auth)
+- All require authentication except /send-reminder (which needs basic auth or API key)
+
+**External Cron Setup:**
+- Create account at EasyCron.com (free tier)
+- Create cron job: POST to `https://your-render-domain.com/api/backups/send-reminder`
+- Schedule: Monthly, 1st at 9:00 AM
+- Auth: Use optional API key header for security
 
 ### 6.2 Frontend
 
@@ -422,14 +457,15 @@ psql -h your-host -U postgres -d your-db < backup_2026-05-02_14-30-45.sql
 
 **Email Reminders:**
 ✅ Default email (albert.babu@gmail.com) added to system  
-✅ Monthly reminder email sent on 1st of month at 9 AM  
-✅ Email includes link to backup page and instructions  
+✅ Reminder endpoint `/api/backups/send-reminder` works and sends emails  
+✅ External cron service (EasyCron) configured to call endpoint monthly  
+✅ Email includes link to backup page and clear instructions  
 ✅ Settings page accessible at `/settings/backup-reminders`  
 ✅ Can add new reminder emails via form  
 ✅ Can remove reminder emails with confirmation  
 ✅ Email validation prevents invalid formats  
 ✅ Email send failures logged but don't break app  
-✅ Cron job reliable and runs monthly  
+✅ External cron service triggers reliably on 1st of month  
 ✅ User sees success/error messages for email management actions  
 
 ---

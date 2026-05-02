@@ -10,6 +10,7 @@ const paymentRoutes = require('./routes/payments');
 const ledgerRoutes = require('./routes/ledger');
 const dashboardRoutes = require('./routes/dashboard');
 const parentRoutes = require('./routes/parent');
+const reportRoutes = require('./routes/reports');
 
 const app = express();
 
@@ -26,6 +27,7 @@ app.use('/api/payments', paymentRoutes);
 app.use('/api/students', ledgerRoutes);  // handles /:id/ledger — does not conflict with studentRoutes
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/parent', parentRoutes);
+app.use('/api/reports', reportRoutes);
 
 app.get('/api/health', (req, res) => res.json({ status: 'ok' }));
 

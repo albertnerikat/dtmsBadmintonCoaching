@@ -304,12 +304,34 @@ router.post('/export-pdf', async (req, res) => {
     // Table data rows
     doc.font('Helvetica').fontSize(8);
     let y = tableTop + rowHeight;
+    let pageNumber = 1;
 
-    students.forEach((student) => {
-      // Check page overflow (750 is near bottom of letter page)
-      if (y > 750) {
+    students.forEach((student, index) => {
+      // Check page overflow BEFORE writing (leave 60px for footer)
+      if (y + rowHeight > 730) {
+        // Add page number footer before new page
+        doc.fontSize(9).font('Helvetica').text(
+          `Page ${pageNumber}`,
+          50,
+          760,
+          { align: 'center' }
+        );
+        pageNumber++;
+
+        // Add new page with header
         doc.addPage();
-        y = 50;
+
+        // Repeat table header on new page
+        let headerY = 50;
+        doc.fontSize(10).font('Helvetica-Bold');
+        doc.text('Name', col1X, headerY, { width: 130 });
+        doc.text('Age Cat.', col2X, headerY, { width: 100 });
+        doc.text('Prev Bal', col3X, headerY, { width: 90, align: 'right' });
+        doc.text('Period', col4X, headerY, { width: 80, align: 'right' });
+        doc.text('Total', col5X, headerY, { width: 45, align: 'right' });
+        doc.moveTo(col1X, headerY + rowHeight - 3).lineTo(col5X + 45, headerY + rowHeight - 3).stroke();
+
+        y = headerY + rowHeight + 5;
       }
 
       // Truncate long names
@@ -320,6 +342,7 @@ router.post('/export-pdf', async (req, res) => {
       const totalOut = `$${student.total_outstanding.toFixed(2)}`;
 
       // Draw text in columns
+      doc.font('Helvetica').fontSize(8);
       doc.text(name, col1X, y, { width: 130 });
       doc.text(category, col2X, y, { width: 100 });
       doc.text(prevBal, col3X, y, { width: 90, align: 'right' });
@@ -334,6 +357,14 @@ router.post('/export-pdf', async (req, res) => {
 
       y += rowHeight;
     });
+
+    // Add page number to last page
+    doc.fontSize(9).font('Helvetica').text(
+      `Page ${pageNumber}`,
+      50,
+      760,
+      { align: 'center' }
+    );
 
     doc.end();
   } catch (error) {

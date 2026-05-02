@@ -16,7 +16,8 @@
       "Bash(dir \"C:\\\\Albert\\\\dtmsBadmintonCoaching\\\\backend\\\\tests\")",
       "Bash(npm test:*)",
       "Bash(grep -rhn \"^\\\\s*it\\(\" /c/Albert/dtmsBadmintonCoaching/backend/tests/*.test.js)",
-      "Bash(npx jest:*)"
+      "Bash(npx jest:*)",
+      "Bash(xargs grep:*)"
     ]
   }
 }

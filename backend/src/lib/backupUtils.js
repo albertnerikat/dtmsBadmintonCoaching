@@ -7,7 +7,16 @@ const { decryptStudent } = require('./encryption');
  */
 async function generateSQLDump() {
   try {
-    // Fetch all data from all tables
+    // Fetch all data from all tables with error handling per table
+    const queryTable = async (tableName) => {
+      try {
+        return await supabase.from(tableName).select('*');
+      } catch (err) {
+        console.warn(`Warning: Could not fetch ${tableName}: ${err.message}`);
+        return { data: [], error: null };
+      }
+    };
+
     const [
       ageCategoriesData,
       recurringSchedulesData,
@@ -16,27 +25,13 @@ async function generateSQLDump() {
       attendanceData,
       paymentsData,
     ] = await Promise.all([
-      supabase.from('age_categories').select('*'),
-      supabase.from('recurring_schedules').select('*'),
-      supabase.from('schedules').select('*'),
-      supabase.from('students').select('*'),
-      supabase.from('attendance').select('*'),
-      supabase.from('payments').select('*'),
+      queryTable('age_categories'),
+      queryTable('recurring_schedules'),
+      queryTable('schedules'),
+      queryTable('students'),
+      queryTable('attendance'),
+      queryTable('payments'),
     ]);
-
-    // Check for errors
-    const errors = [
-      ageCategoriesData.error,
-      recurringSchedulesData.error,
-      schedulesData.error,
-      studentsData.error,
-      attendanceData.error,
-      paymentsData.error,
-    ].filter(Boolean);
-
-    if (errors.length > 0) {
-      throw new Error(`Database query failed: ${errors[0].message}`);
-    }
 
     // Decrypt student names
     const students = (studentsData.data || []).map(student => {

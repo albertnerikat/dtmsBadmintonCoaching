@@ -50,15 +50,16 @@ export default function BackupSettingsPage() {
       return;
     }
 
-    if (reminders.includes(newEmail)) {
-      setError('This email is already in the list');
+    const emailExists = reminders.some(r => r.email === newEmail);
+    if (emailExists) {
+      setError('Email already in reminder list');
       return;
     }
 
     setSubmitting(true);
     try {
-      await api.post('/backups/reminders', { email: newEmail });
-      setReminders([...reminders, newEmail]);
+      const result = await api.post('/backups/reminders', { email: newEmail });
+      setReminders([...reminders, result.email]);
       setNewEmail('');
       setSuccess('Email added successfully');
       setTimeout(() => setSuccess(''), 4000);
@@ -69,16 +70,16 @@ export default function BackupSettingsPage() {
     }
   }
 
-  async function handleDeleteEmail(email) {
+  async function handleDeleteEmail(id, email) {
     // Confirm deletion
     if (!window.confirm(`Remove ${email} from backup reminders?`)) {
       return;
     }
 
-    setDeleting(email);
+    setDeleting(id);
     try {
-      await api.delete(`/backups/reminders/${encodeURIComponent(email)}`);
-      setReminders(reminders.filter(e => e !== email));
+      await api.delete(`/backups/reminders/${id}`);
+      setReminders(reminders.filter(r => r.id !== id));
       setError('');
       setSuccess('Email removed successfully');
       setTimeout(() => setSuccess(''), 4000);
@@ -149,15 +150,15 @@ export default function BackupSettingsPage() {
           <p className="text-gray-500 text-sm">No reminder emails configured yet.</p>
         ) : (
           <div className="space-y-2">
-            {reminders.map(email => (
-              <div key={email} className="flex items-center justify-between bg-gray-50 rounded px-4 py-3 border border-gray-200">
-                <span className="text-sm">{email}</span>
+            {reminders.map(reminder => (
+              <div key={reminder.id} className="flex items-center justify-between bg-gray-50 rounded px-4 py-3 border border-gray-200">
+                <span className="text-sm">{reminder.email}</span>
                 <button
-                  onClick={() => handleDeleteEmail(email)}
-                  disabled={deleting === email}
+                  onClick={() => handleDeleteEmail(reminder.id, reminder.email)}
+                  disabled={deleting === reminder.id}
                   className="text-red-600 hover:text-red-800 text-sm font-medium disabled:opacity-50 transition-colors"
                 >
-                  {deleting === email ? 'Removing...' : 'Remove'}
+                  {deleting === reminder.id ? 'Removing...' : 'Remove'}
                 </button>
               </div>
             ))}

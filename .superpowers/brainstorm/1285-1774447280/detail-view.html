@@ -1,0 +1,220 @@
+<h2>Detail View — How should it open?</h2>
+<p class="subtitle">After clicking a month on the dashboard, which presentation feels best?</p>
+
+<div class="cards">
+
+  <!-- Option A: Modal -->
+  <div class="card" data-choice="a" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding:16px;background:#f8fafc;position:relative;">
+
+      <!-- Background dashboard (dimmed) -->
+      <div style="opacity:0.3;font-size:10px;margin-bottom:6px;">
+        <div style="background:#1d4ed8;border-radius:6px;padding:8px;color:white;margin-bottom:4px;">
+          <div style="font-size:9px;opacity:0.8;">March 2026 · Current Month</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;margin-top:4px;text-align:center;">
+            <div><div style="font-size:11px;font-weight:700;">$1,240</div><div style="font-size:7px;">Owed</div></div>
+            <div><div style="font-size:11px;font-weight:700;">$980</div><div style="font-size:7px;">Paid</div></div>
+            <div style="background:rgba(255,255,255,0.2);border-radius:4px;"><div style="font-size:11px;font-weight:700;">$260</div><div style="font-size:7px;">Outstanding</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Modal overlay -->
+      <div style="position:relative;background:white;border-radius:10px;box-shadow:0 8px 32px rgba(0,0,0,0.25);padding:12px;border:1px solid #e2e8f0;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+          <span style="font-size:11px;font-weight:700;color:#1e293b;">March 2026 · Student Breakdown</span>
+          <span style="font-size:14px;color:#94a3b8;cursor:pointer;">×</span>
+        </div>
+        <table style="width:100%;font-size:10px;border-collapse:collapse;">
+          <thead>
+            <tr style="background:#f1f5f9;">
+              <th style="padding:5px 6px;text-align:left;color:#374151;">Student</th>
+              <th style="padding:5px 6px;text-align:right;color:#374151;">Owed</th>
+              <th style="padding:5px 6px;text-align:right;color:#374151;">Paid</th>
+              <th style="padding:5px 6px;text-align:right;color:#374151;">Balance</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr style="border-top:1px solid #f1f5f9;">
+              <td style="padding:5px 6px;color:#1d4ed8;text-decoration:underline;cursor:pointer;">Alice Tan</td>
+              <td style="padding:5px 6px;text-align:right;">$80</td>
+              <td style="padding:5px 6px;text-align:right;color:#15803d;">$80</td>
+              <td style="padding:5px 6px;text-align:right;color:#15803d;">—</td>
+            </tr>
+            <tr style="border-top:1px solid #f1f5f9;background:#fef2f2;">
+              <td style="padding:5px 6px;color:#1d4ed8;text-decoration:underline;cursor:pointer;">Ben Lim</td>
+              <td style="padding:5px 6px;text-align:right;">$160</td>
+              <td style="padding:5px 6px;text-align:right;color:#15803d;">$0</td>
+              <td style="padding:5px 6px;text-align:right;color:#dc2626;font-weight:600;">$160</td>
+            </tr>
+            <tr style="border-top:1px solid #f1f5f9;">
+              <td style="padding:5px 6px;color:#1d4ed8;text-decoration:underline;cursor:pointer;">Clara Ng</td>
+              <td style="padding:5px 6px;text-align:right;">$120</td>
+              <td style="padding:5px 6px;text-align:right;color:#15803d;">$120</td>
+              <td style="padding:5px 6px;text-align:right;color:#15803d;">—</td>
+            </tr>
+            <tr style="border-top:1px solid #f1f5f9;background:#fef2f2;">
+              <td style="padding:5px 6px;color:#1d4ed8;text-decoration:underline;cursor:pointer;">David Koh</td>
+              <td style="padding:5px 6px;text-align:right;">$100</td>
+              <td style="padding:5px 6px;text-align:right;color:#15803d;">$0</td>
+              <td style="padding:5px 6px;text-align:right;color:#dc2626;font-weight:600;">$100</td>
+            </tr>
+          </tbody>
+        </table>
+        <div style="font-size:9px;color:#94a3b8;margin-top:6px;">Click a student name to open their full ledger →</div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>A · Modal Overlay</h3>
+      <p>Opens over the dashboard. Close (×) returns you to exactly where you were. Student names link to their ledger.</p>
+    </div>
+  </div>
+
+  <!-- Option B: New Page -->
+  <div class="card" data-choice="b" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding:16px;background:#f8fafc;">
+      <!-- Full page mockup -->
+      <div style="background:white;border:1px solid #e2e8f0;border-radius:8px;padding:10px;">
+        <!-- Back button -->
+        <div style="font-size:10px;color:#2563eb;margin-bottom:8px;cursor:pointer;">← Back to Dashboard</div>
+
+        <!-- Page header -->
+        <div style="margin-bottom:8px;">
+          <div style="font-size:13px;font-weight:700;color:#1e293b;">March 2026 · Student Breakdown</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;margin-top:6px;">
+            <div style="background:#f1f5f9;border-radius:5px;padding:6px;text-align:center;">
+              <div style="font-size:12px;font-weight:700;">$1,240</div><div style="font-size:8px;color:#64748b;">Owed</div>
+            </div>
+            <div style="background:#f0fdf4;border-radius:5px;padding:6px;text-align:center;">
+              <div style="font-size:12px;font-weight:700;color:#15803d;">$980</div><div style="font-size:8px;color:#64748b;">Paid</div>
+            </div>
+            <div style="background:#fef2f2;border-radius:5px;padding:6px;text-align:center;">
+              <div style="font-size:12px;font-weight:700;color:#dc2626;">$260</div><div style="font-size:8px;color:#64748b;">Outstanding</div>
+            </div>
+          </div>
+        </div>
+
+        <table style="width:100%;font-size:10px;border-collapse:collapse;">
+          <thead>
+            <tr style="background:#f1f5f9;">
+              <th style="padding:5px 6px;text-align:left;color:#374151;">Student</th>
+              <th style="padding:5px 6px;text-align:right;color:#374151;">Owed</th>
+              <th style="padding:5px 6px;text-align:right;color:#374151;">Paid</th>
+              <th style="padding:5px 6px;text-align:right;color:#374151;">Balance</th>
+              <th style="padding:5px 6px;text-align:center;color:#374151;">Ledger</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr style="border-top:1px solid #f1f5f9;">
+              <td style="padding:5px 6px;">Alice Tan</td>
+              <td style="padding:5px 6px;text-align:right;">$80</td>
+              <td style="padding:5px 6px;text-align:right;color:#15803d;">$80</td>
+              <td style="padding:5px 6px;text-align:right;color:#15803d;">—</td>
+              <td style="padding:5px 6px;text-align:center;"><span style="color:#2563eb;font-size:9px;cursor:pointer;">View →</span></td>
+            </tr>
+            <tr style="border-top:1px solid #f1f5f9;background:#fef9f9;">
+              <td style="padding:5px 6px;">Ben Lim</td>
+              <td style="padding:5px 6px;text-align:right;">$160</td>
+              <td style="padding:5px 6px;text-align:right;color:#15803d;">$0</td>
+              <td style="padding:5px 6px;text-align:right;color:#dc2626;font-weight:600;">$160</td>
+              <td style="padding:5px 6px;text-align:center;"><span style="color:#2563eb;font-size:9px;cursor:pointer;">View →</span></td>
+            </tr>
+            <tr style="border-top:1px solid #f1f5f9;">
+              <td style="padding:5px 6px;">Clara Ng</td>
+              <td style="padding:5px 6px;text-align:right;">$120</td>
+              <td style="padding:5px 6px;text-align:right;color:#15803d;">$120</td>
+              <td style="padding:5px 6px;text-align:right;color:#15803d;">—</td>
+              <td style="padding:5px 6px;text-align:center;"><span style="color:#2563eb;font-size:9px;cursor:pointer;">View →</span></td>
+            </tr>
+            <tr style="border-top:1px solid #f1f5f9;background:#fef9f9;">
+              <td style="padding:5px 6px;">David Koh</td>
+              <td style="padding:5px 6px;text-align:right;">$100</td>
+              <td style="padding:5px 6px;text-align:right;color:#15803d;">$0</td>
+              <td style="padding:5px 6px;text-align:right;color:#dc2626;font-weight:600;">$100</td>
+              <td style="padding:5px 6px;text-align:center;"><span style="color:#2563eb;font-size:9px;cursor:pointer;">View →</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>B · New Page</h3>
+      <p>Full-screen detail page with month summary at top, student table below. "View →" links to each student's ledger. Back button returns to dashboard.</p>
+    </div>
+  </div>
+
+  <!-- Option C: Inline Expand -->
+  <div class="card" data-choice="c" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding:16px;background:#f8fafc;">
+      <div style="font-size:11px;font-weight:700;text-transform:uppercase;color:#64748b;margin-bottom:8px;">Financial Summary</div>
+
+      <!-- Hero current month -->
+      <div style="background:linear-gradient(135deg,#1d4ed8,#3b82f6);border-radius:8px;padding:10px;margin-bottom:6px;color:white;">
+        <div style="font-size:9px;opacity:0.8;margin-bottom:4px;">March 2026 · Current Month</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;text-align:center;">
+          <div><div style="font-size:12px;font-weight:700;">$1,240</div><div style="font-size:8px;opacity:0.7;">Owed</div></div>
+          <div><div style="font-size:12px;font-weight:700;">$980</div><div style="font-size:8px;opacity:0.7;">Paid</div></div>
+          <div style="background:rgba(255,255,255,0.15);border-radius:4px;"><div style="font-size:12px;font-weight:700;">$260</div><div style="font-size:8px;opacity:0.7;">Outstanding</div></div>
+        </div>
+      </div>
+
+      <!-- Past months with one expanded -->
+      <div style="background:white;border:1px solid #e2e8f0;border-radius:8px;padding:8px;">
+        <div style="font-size:9px;font-weight:600;color:#374151;margin-bottom:4px;">Previous 6 Months</div>
+
+        <!-- Feb row — expanded -->
+        <div style="border:1px solid #3b82f6;border-radius:6px;margin-bottom:3px;overflow:hidden;">
+          <div style="display:grid;grid-template-columns:auto 1fr 1fr 1fr;gap:4px;font-size:10px;padding:5px 6px;background:#eff6ff;">
+            <span style="color:#1d4ed8;font-weight:600;">Feb ▴</span>
+            <span style="text-align:right;">$1,380</span>
+            <span style="text-align:right;color:#15803d;">$1,380</span>
+            <span style="text-align:right;color:#15803d;">—</span>
+          </div>
+          <!-- Expanded student list -->
+          <div style="padding:6px;background:#f8fafc;border-top:1px solid #bfdbfe;">
+            <table style="width:100%;font-size:9px;border-collapse:collapse;">
+              <tr style="color:#64748b;">
+                <th style="padding:2px 4px;text-align:left;">Student</th>
+                <th style="padding:2px 4px;text-align:right;">Owed</th>
+                <th style="padding:2px 4px;text-align:right;">Paid</th>
+                <th style="padding:2px 4px;text-align:right;">Bal.</th>
+              </tr>
+              <tr>
+                <td style="padding:2px 4px;color:#2563eb;cursor:pointer;">Alice Tan</td>
+                <td style="padding:2px 4px;text-align:right;">$80</td>
+                <td style="padding:2px 4px;text-align:right;color:#15803d;">$80</td>
+                <td style="padding:2px 4px;text-align:right;color:#15803d;">—</td>
+              </tr>
+              <tr>
+                <td style="padding:2px 4px;color:#2563eb;cursor:pointer;">Clara Ng</td>
+                <td style="padding:2px 4px;text-align:right;">$120</td>
+                <td style="padding:2px 4px;text-align:right;color:#15803d;">$120</td>
+                <td style="padding:2px 4px;text-align:right;color:#15803d;">—</td>
+              </tr>
+            </table>
+            <div style="font-size:8px;color:#94a3b8;margin-top:4px;">Click student name → full ledger</div>
+          </div>
+        </div>
+
+        <!-- Other months collapsed -->
+        <div style="display:grid;grid-template-columns:auto 1fr 1fr 1fr;gap:4px;font-size:10px;padding:4px 6px;border-radius:4px;" onmouseenter="this.style.background='#f1f5f9'" onmouseleave="this.style.background=''">
+          <span style="color:#374151;font-weight:500;">Jan ▾</span><span style="text-align:right;">$1,200</span><span style="text-align:right;color:#15803d;">$1,050</span><span style="text-align:right;color:#dc2626;font-weight:600;">$150</span>
+        </div>
+        <div style="display:grid;grid-template-columns:auto 1fr 1fr 1fr;gap:4px;font-size:10px;padding:4px 6px;border-radius:4px;" onmouseenter="this.style.background='#f1f5f9'" onmouseleave="this.style.background=''">
+          <span style="color:#374151;font-weight:500;">Dec ▾</span><span style="text-align:right;">$960</span><span style="text-align:right;color:#15803d;">$960</span><span style="text-align:right;color:#15803d;">—</span>
+        </div>
+        <div style="display:grid;grid-template-columns:auto 1fr 1fr 1fr;gap:4px;font-size:10px;padding:4px 6px;border-radius:4px;" onmouseenter="this.style.background='#f1f5f9'" onmouseleave="this.style.background=''">
+          <span style="color:#374151;font-weight:500;">Nov ▾</span><span style="text-align:right;">$1,100</span><span style="text-align:right;color:#15803d;">$880</span><span style="text-align:right;color:#dc2626;font-weight:600;">$220</span>
+        </div>
+        <div style="display:grid;grid-template-columns:auto 1fr 1fr 1fr;gap:4px;font-size:10px;padding:4px 6px;border-radius:4px;" onmouseenter="this.style.background='#f1f5f9'" onmouseleave="this.style.background=''">
+          <span style="color:#374151;font-weight:500;">Sep ▾</span><span style="text-align:right;">$1,000</span><span style="text-align:right;color:#15803d;">$750</span><span style="text-align:right;color:#dc2626;font-weight:600;">$250</span>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>C · Inline Expand</h3>
+      <p>Click a month row to expand it in place, revealing the student breakdown. No navigation needed — everything stays on the dashboard.</p>
+    </div>
+  </div>
+
+</div>

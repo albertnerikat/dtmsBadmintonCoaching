@@ -1,0 +1,32 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(xargs ls *)",
+      "Bash(ls -d .worktrees)",
+      "Bash(ls -d worktrees)",
+      "Bash(curl -s http://localhost:3001/api/health)",
+      "Bash(curl -s -X POST http://localhost:3001/api/auth/login -H 'Content-Type: application/json' -d '{\"email\":\"coach@dtms.com\",\"password\":\"coach1234\"}')",
+      "Bash(npm list *)",
+      "Read(//c/c/Albert/dtmsBadmintonCoaching/.worktrees/**)",
+      "Bash(curl -s http://localhost:3001/api/reports/period-outstanding)",
+      "Bash(curl -s -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiY29hY2giLCJpYXQiOjE3Nzc3MzY5OTksImV4cCI6MTc3NzgyMzM5OX0.nHvQ8fLwEYzcsKrsTrLAbS9aQdZiukmwKHSsNP0-y-0' 'http://localhost:3001/api/reports/period-outstanding?start_date=2025-05-01&end_date=2025-05-31')",
+      "Bash(curl -s -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiY29hY2giLCJpYXQiOjE3Nzc3MzY5OTksImV4cCI6MTc3NzgyMzM5OX0.nHvQ8fLwEYzcsKrsTrLAbS9aQdZiukmwKHSsNP0-y-0' 'http://localhost:3001/api/reports/period-outstanding/e04183be-094c-44fe-899b-fcf3809fc574/details?start_date=2025-05-01&end_date=2025-05-31')",
+      "Bash(python3 -m json.tool)",
+      "Bash(curl -s -X POST -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiY29hY2giLCJpYXQiOjE3Nzc3MzY5OTksImV4cCI6MTc3NzgyMzM5OX0.nHvQ8fLwEYzcsKrsTrLAbS9aQdZiukmwKHSsNP0-y-0' -H 'Content-Type: application/json' http://localhost:3001/api/reports/export-pdf)",
+      "Bash(curl -I -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiY29hY2giLCJpYXQiOjE3Nzc3MzY5OTksImV4cCI6MTc3NzgyMzM5OX0.nHvQ8fLwEYzcsKrsTrLAbS9aQdZiukmwKHSsNP0-y-0' 'http://localhost:3001/api/reports/period-outstanding?start_date=2025-05-01&end_date=2025-05-31')",
+      "Bash(pkill -f \"node server.js\")",
+      "Bash(npm run *)",
+      "Bash(curl -X OPTIONS http://localhost:3001/api/reports/export-pdf -H \"Origin: http://localhost:5173\" -v)",
+      "Bash(curl -X POST -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiY29hY2giLCJpYXQiOjE3Nzc3MzY5OTksImV4cCI6MTc3NzgyMzM5OX0.nHvQ8fLwEYzcsKrsTrLAbS9aQdZiukmwKHSsNP0-y-0' -H 'Content-Type: application/json' -d '{}' http://localhost:3001/api/reports/period-outstanding)",
+      "Bash(curl -s -X POST -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiY29hY2giLCJpYXQiOjE3Nzc3MzY5OTksImV4cCI6MTc3NzgyMzM5OX0.nHvQ8fLwEYzcsKrsTrLAbS9aQdZiukmwKHSsNP0-y-0' -H 'Content-Type: application/json' -d '{\"student_id\":\"test\",\"amount\":100,\"payment_date\":\"2025-05-01\"}' http://localhost:3001/api/payments)",
+      "Bash(curl -v -X POST -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiY29hY2giLCJpYXQiOjE3Nzc3MzY5OTksImV4cCI6MTc3NzgyMzM5OX0.nHvQ8fLwEYzcsKrsTrLAbS9aQdZiukmwKHSsNP0-y-0' -H 'Content-Type: application/json' -d '{\"period\":{\"start_date\":\"2025-05-01\",\"end_date\":\"2025-05-31\"},\"summary\":{\"total_students\":1,\"total_previous_balance\":0,\"total_period_outstanding\":0,\"total_outstanding\":0},\"students\":[{\"id\":\"test\",\"name\":\"Test\",\"age_category\":\"U9\",\"previous_balance\":0,\"period_outstanding\":0,\"total_outstanding\":0,\"is_free_only\":false,\"status\":\"active\"}]}' http://localhost:3001/api/reports/export-pdf)",
+      "Bash(curl -s -X POST -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiY29hY2giLCJpYXQiOjE3Nzc3MzY5OTksImV4cCI6MTc3NzgyMzM5OX0.nHvQ8fLwEYzcsKrsTrLAbS9aQdZiukmwKHSsNP0-y-0' -H 'Content-Type: application/json' -d '{\"period\":{\"start_date\":\"2025-05-01\",\"end_date\":\"2025-05-31\"},\"summary\":{\"total_students\":1,\"total_previous_balance\":0,\"total_period_outstanding\":0,\"total_outstanding\":0},\"students\":[{\"id\":\"test\",\"name\":\"Test\",\"age_category\":\"U9\",\"previous_balance\":0,\"period_outstanding\":0,\"total_outstanding\":0,\"is_free_only\":false,\"status\":\"active\"}]}' http://localhost:3001/api/reports/export-pdf)",
+      "Bash(curl -s -X GET -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiY29hY2giLCJpYXQiOjE3Nzc3MzY5OTksImV4cCI6MTc3NzgyMzM5OX0.nHvQ8fLwEYzcsKrsTrLAbS9aQdZiukmwKHSsNP0-y-0' http://localhost:3001/api/reports/export-pdf)",
+      "Bash(taskkill /F /IM node.exe /T)",
+      "PowerShell(Stop-Process -Force)"
+    ],
+    "additionalDirectories": [
+      "\\tmp"
+    ]
+  }
+}

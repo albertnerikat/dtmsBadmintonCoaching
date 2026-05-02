@@ -33,7 +33,7 @@ export default function BackupButton() {
       const link = document.createElement('a');
       link.href = url;
       const timestamp = new Date().toISOString().slice(0, 19).replace(/:/g, '-');
-      link.download = `dtms-backup-${timestamp}.json`;
+      link.download = `backup_${timestamp}.sql`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);

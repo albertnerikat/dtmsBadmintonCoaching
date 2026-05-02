@@ -35,7 +35,12 @@ function detectPeriodType(startDate, endDate) {
  * @param {array} sessions - Attendance records with { date, status, fee }
  * @param {array} payments - Payment records with { payment_date, amount }
  * @param {string} periodStartDate - Period start (YYYY-MM-DD)
- * @returns {object} { previous_balance, period_outstanding, total_outstanding, is_free_only }
+ * @returns {object} {
+ *   previous_balance: number - Outstanding fees before period
+ *   period_outstanding: number - Outstanding fees during period
+ *   total_outstanding: number - Sum of both
+ *   is_free_only: boolean - True if all period sessions have status='free'
+ * }
  */
 function calculateStudentBalance(sessions, payments, periodStartDate) {
   const startDate = parseLocalDate(periodStartDate);
@@ -56,9 +61,10 @@ function calculateStudentBalance(sessions, payments, periodStartDate) {
   const period_outstanding = feesDuring - amountDuring;
   const total_outstanding = previous_balance + period_outstanding;
 
-  // Check if all period sessions are free
+  // is_free_only is true only if all period sessions are explicitly 'free'
   const allSessionsDuring = sessions.filter(s => parseLocalDate(s.date) >= startDate);
-  const is_free_only = allSessionsDuring.length > 0 && sessionsDuring.length === 0;
+  const freeSessions = allSessionsDuring.filter(s => s.status === 'free');
+  const is_free_only = allSessionsDuring.length > 0 && freeSessions.length === allSessionsDuring.length;
 
   return {
     previous_balance: Math.max(previous_balance, 0), // Never negative

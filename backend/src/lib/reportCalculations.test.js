@@ -69,5 +69,47 @@ describe('reportCalculations', () => {
       expect(result.previous_balance).toBe(0);
       expect(result.period_outstanding).toBe(0);
     });
+
+    test('correctly identifies mixed statuses (not free_only)', () => {
+      const sessions = [
+        { date: '2026-03-10', status: 'free', fee: 15 },
+        { date: '2026-03-15', status: 'absent', fee: 0 },
+      ];
+      const payments = [];
+      const startDate = '2026-03-01';
+
+      const result = calculateStudentBalance(sessions, payments, startDate);
+
+      expect(result.is_free_only).toBe(false); // Not all free
+      expect(result.period_outstanding).toBe(0); // No present sessions
+    });
+
+    test('handles session on exact start date', () => {
+      const sessions = [
+        { date: '2026-02-15', status: 'present', fee: 20 },
+        { date: '2026-03-01', status: 'present', fee: 15 }, // Exactly on start_date
+      ];
+      const payments = [];
+      const startDate = '2026-03-01';
+
+      const result = calculateStudentBalance(sessions, payments, startDate);
+
+      expect(result.previous_balance).toBe(20); // Only Feb session
+      expect(result.period_outstanding).toBe(15); // Mar 1 session counts as in period
+    });
+
+    test('handles payment on exact end date', () => {
+      const sessions = [
+        { date: '2026-03-10', status: 'present', fee: 30 },
+      ];
+      const payments = [
+        { payment_date: '2026-03-31', amount: 15 }, // Exactly on end_date (if that's our range)
+      ];
+      const startDate = '2026-03-01';
+
+      const result = calculateStudentBalance(sessions, payments, startDate);
+
+      expect(result.period_outstanding).toBe(15); // 30 - 15
+    });
   });
 });

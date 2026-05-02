@@ -73,6 +73,8 @@ export async function exportAsPDF(reportData) {
     const { getToken } = await import('./auth');
     const token = getToken();
 
+    const API_BASE_URL = import.meta.env.VITE_API_URL || '';
+
     const headers = {
       'Content-Type': 'application/json',
     };
@@ -82,7 +84,7 @@ export async function exportAsPDF(reportData) {
       headers['Authorization'] = `Bearer ${token}`;
     }
 
-    const response = await fetch('/api/reports/export-pdf', {
+    const response = await fetch(`${API_BASE_URL}/api/reports/export-pdf`, {
       method: 'POST',
       headers,
       body: JSON.stringify(reportData),

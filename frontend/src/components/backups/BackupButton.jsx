@@ -12,8 +12,10 @@ export default function BackupButton() {
     setLoading(true);
 
     try {
+      const API_BASE_URL = import.meta.env.VITE_API_URL || '';
+
       // Fetch the backup file from the API
-      const response = await fetch('/api/backups/export', {
+      const response = await fetch(`${API_BASE_URL}/api/backups/export`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`,

@@ -18,6 +18,7 @@ export default function Navbar() {
         <Link to="/students" className="text-sm hover:underline">Students</Link>
         <Link to="/schedules" className="text-sm hover:underline">Schedules</Link>
         <Link to="/reports" className="text-sm hover:underline">Reports</Link>
+        <Link to="/settings/backup-reminders" className="text-sm hover:underline">Backup Settings</Link>
       </div>
       <button onClick={handleLogout} className="text-sm hover:underline">Logout</button>
     </nav>

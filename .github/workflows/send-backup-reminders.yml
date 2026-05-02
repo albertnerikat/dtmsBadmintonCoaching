@@ -1,0 +1,13 @@
+name: Send Backup Reminders
+
+on:
+  schedule:
+    - cron: '0 9 1 * *'
+  workflow_dispatch:
+
+jobs:
+  backup-reminders:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger backup reminders
+        run: curl -s -X POST "https://dtmsbadmintoncoaching-backend.onrender.com/api/backups/send-reminder" -H "x-cron-key: 699a93cfa5f0f24c6c0456617f332426" -H "content-type: application/json"

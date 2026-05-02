@@ -9,6 +9,7 @@ import AttendancePage from './pages/AttendancePage';
 import DashboardPage from './pages/DashboardPage';
 import LedgerPage from './pages/LedgerPage';
 import ParentPage from './pages/ParentPage';
+import ReportsPage from './pages/ReportsPage';
 
 function CoachLayout({ children }) {
   return (
@@ -38,6 +39,7 @@ export default function App() {
           <Route path="/schedules" element={<ProtectedCoachPage><SchedulesPage /></ProtectedCoachPage>} />
           <Route path="/attendance/:scheduleId" element={<ProtectedCoachPage><AttendancePage /></ProtectedCoachPage>} />
           <Route path="/ledger/:studentId" element={<ProtectedCoachPage><LedgerPage /></ProtectedCoachPage>} />
+          <Route path="/reports" element={<ProtectedCoachPage><ReportsPage /></ProtectedCoachPage>} />
           <Route path="/parent/:token" element={<ParentPage />} />
           <Route path="*" element={<Navigate to="/dashboard" replace />} />
         </Routes>
